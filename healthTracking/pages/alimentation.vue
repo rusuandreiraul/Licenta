@@ -8,9 +8,12 @@ import {
 } from "@internationalized/date";
 import { useDateWeek } from "~/composable/useDateWeek";
 import { useAuth } from "~/composable/useAuth";
+import { useGoals } from "~/composable/useGoals";
 import AlimentationCard from "~/components/alimentationCard.vue";
 
 const { user } = useAuth();
+
+const { dataGoals, getGoals } = useGoals();
 
 const { getLastWeekDates } = useDateWeek();
 
@@ -94,7 +97,27 @@ watch([modelValueDate, user], () => {
   }
 });
 
-const value = ref(0);
+const goals = ref(null);
+
+onMounted(async () => {
+  await getGoals();
+  goals.value = dataGoals.value;
+  console.log("Obiective încărcate:", dataGoals.value);
+});
+
+const caloriesGoal = computed(() => {
+  if (!goals.value) return 0;
+
+  const calorieGoal = goals.value.find((g) => g.type === "Alimentation");
+
+  return calorieGoal ? calorieGoals.targetValue : 0;
+});
+
+const progressPercent = computed(() => {
+  if (caloriesGoal.value === 0) return 0;
+  const percent = (allCalories.value / caloriesGoal.value) * 100;
+  return Math.min(percent, 100);
+});
 </script>
 
 <template>
@@ -167,8 +190,11 @@ const value = ref(0);
           </div>
         </div>
         <div class="bg-gray-100 border-lg rounded-2xl p-4">
-          Progres cu iconita
-          <UProgress v-model="value" status />
+          Goal: {{ caloriesGoal }} kcal
+          <UProgress :value="progressPercent" status />
+        </div>
+        <div>
+          <h1 class="p-4 font-bold text-2xl text-center">Mesele tale</h1>
         </div>
         <div class="bg-green-200 p-4 flex justify-between items-center">
           <div>
