@@ -115,6 +115,26 @@ async function fetchUser() {
   }
 }
 
+async function fetchChanges() {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/user-change/${username}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userValue),
+      }
+    );
+    if (response.ok) {
+      //continua modificare user cu UPDATE
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 async function fetchGoals() {
   try {
     const response = await fetch(`http://localhost:8080/goals/${username}`, {
@@ -294,12 +314,36 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- Buton de profil / edit -->
-            <button
-              class="mt-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full text-sm font-medium transition-colors"
-            >
-              Edit Profile
-            </button>
+            <UModal title="Edit profile">
+              <UButton
+                label="Edit profile"
+                class="mt-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full text-sm font-medium transition-colors"
+              >
+              </UButton>
+              <template #body>
+                <div class="flex flex-col p-3 gap-2">
+                  <label>Password</label>
+                  <UInput type="password" placeholder="*******" />
+                  <label>Inaltime</label>
+                  <UInput
+                    type="number"
+                    placeholder="Introdu inaltime..."
+                    v-model="userValue.height"
+                  />
+                  <label>Greutate</label>
+                  <UInput
+                    type="number"
+                    placeholder="Introdu greutate..."
+                    v-model="userValue.weight"
+                  />
+                  <UButton
+                    onclick="fetchChanges()"
+                    label="Confirma modificari"
+                    class="mt-2 py-2"
+                  />
+                </div>
+              </template>
+            </UModal>
           </div>
 
           <div>

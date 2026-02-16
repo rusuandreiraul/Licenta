@@ -10,6 +10,7 @@ import { useDateWeek } from "~/composable/useDateWeek";
 import { useAuth } from "~/composable/useAuth";
 import { useGoals } from "~/composable/useGoals";
 import AlimentationCard from "~/components/alimentationCard.vue";
+import { isEmpty } from "@nuxt/ui/runtime/utils/index.js";
 
 const { user } = useAuth();
 
@@ -110,7 +111,7 @@ const caloriesGoal = computed(() => {
 
   const calorieGoal = goals.value.find((g) => g.type === "Alimentation");
 
-  return calorieGoal ? calorieGoals.targetValue : 0;
+  return calorieGoal ? calorieGoal.targetValue : 0;
 });
 
 const progressPercent = computed(() => {
@@ -190,8 +191,8 @@ const progressPercent = computed(() => {
           </div>
         </div>
         <div class="bg-gray-100 border-lg rounded-2xl p-4">
-          Goal: {{ caloriesGoal }} kcal
-          <UProgress :value="progressPercent" status />
+          <i class="text-bold">Goal: {{ caloriesGoal }} kcal </i>
+          <UProgress v-model="progressPercent" status />
         </div>
         <div>
           <h1 class="p-4 font-bold text-2xl text-center">Mesele tale</h1>
@@ -202,8 +203,10 @@ const progressPercent = computed(() => {
             <img src="/micdejun.jpeg" class="h-20 rounded-2xl" />
           </div>
           <div class="flex flex-col">
-            <div>Recomandat: 400-600 kcal</div>
-            <div v-for="b in breakfast">{{ b }}</div>
+            <div v-if="isEmpty(breakfast)">Recomandat: 400-600 kcal</div>
+            <div v-else>
+              <div v-for="b in breakfast">{{ b }}</div>
+            </div>
           </div>
           <div>
             <AddModal type="alimentation" :user="user" :date="modelValueDate" />
@@ -215,8 +218,10 @@ const progressPercent = computed(() => {
             <img src="/pranz.jpg" class="h-20 rounded-2xl" />
           </div>
           <div class="flex flex-col">
-            <div>Recomandat: 600-800 kcal</div>
-            <div v-for="l in lunch">{{ l }}</div>
+            <div v-if="isEmpty(lunch)">Recomandat: 600-800 kcal</div>
+            <div v-else>
+              <div v-for="l in lunch">{{ l }}</div>
+            </div>
           </div>
           <div>
             <AddModal type="alimentation" :user="user" :date="modelValueDate" />
@@ -228,8 +233,10 @@ const progressPercent = computed(() => {
             <img src="/cina.jpeg" class="h-20 rounded-2xl" />
           </div>
           <div class="flex flex-col">
-            <div>Recomandat: 300-500 kcal</div>
-            <div v-for="d in dinner">{{ d }}</div>
+            <div v-if="isEmpty(dinner)">Recomandat: 300-500 kcal</div>
+            <div v-else>
+              <div v-for="d in dinner">{{ d }}</div>
+            </div>
           </div>
           <div>
             <AddModal type="alimentation" :user="user" :date="modelValueDate" />

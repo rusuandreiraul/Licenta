@@ -24,7 +24,5 @@ const props = defineProps({
     </template>
 
     <p class="text-center">{{ props.content }}</p>
-
-    +- fata de ziua de ieri implementeaza
   </UCard>
 </template>
