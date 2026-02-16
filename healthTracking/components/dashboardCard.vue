@@ -82,6 +82,26 @@ const props = defineProps({
       </div>
     </div>
 
+    <div v-else>
+      <div
+        class="bg-orange-200 border-amber-500 gap-2 m-2 rounded-xl border grid grid-cols-2"
+      >
+        <div>{{ props.content.stats?.calories }} kcal</div>
+        <div>{{ props.content.stats?.fat }} g</div>
+      </div>
+      <div
+        class="bg-orange-200 border-amber-500 gap-2 m-2 rounded-xl border grid grid-cols-2"
+      >
+        <div>{{ props.content.stats?.carbs }} g</div>
+        <div>{{ props.content.stats?.protein }} g</div>
+      </div>
+      <div class="p-3 bg-orange-200 border-amber-500 rounded-xl border">
+        <ol v-for="name in props.content.names">
+          <li>{{ name }}</li>
+        </ol>
+      </div>
+    </div>
+
     <template #footer>
       <UButton variant="ghost" block color="gray" class="hover:bg-gray-100">
         Vezi detalii complete

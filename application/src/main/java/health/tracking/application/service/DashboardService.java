@@ -1,13 +1,17 @@
 package health.tracking.application.service;
 
+import health.tracking.application.dto.AlimentationDTO;
 import health.tracking.application.dto.DashboardDailyDTO;
 import health.tracking.application.dto.DashboardWeekDTO;
 import health.tracking.application.entities.Activity;
+import health.tracking.application.entities.Alimentation;
 import health.tracking.application.entities.Sleep;
 import health.tracking.application.entities.User;
 import health.tracking.application.mapper.ActivityMapper;
+import health.tracking.application.mapper.AlimentationMapper;
 import health.tracking.application.mapper.SleepMapper;
 import health.tracking.application.repository.ActivityRepository;
+import health.tracking.application.repository.AlimentationRepository;
 import health.tracking.application.repository.SleepRepository;
 import health.tracking.application.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +32,22 @@ public class DashboardService {
     SleepRepository sleepRepository;
 
     @Autowired
+    AlimentationRepository alimentationRepository;
+
+    @Autowired
+    AlimentationMapper alimentationMapper;
+
+    @Autowired
     ActivityMapper activityMapper;
     @Autowired
     SleepMapper sleepMapper;
 
     public DashboardDailyDTO getDailyData(String username, String selectedDate) {
         int totalDuration=0;
+        double totalCalories=0.0;
+        double totalFat=0.0; //string
+        double totalCarbos=0.0; //string
+        double totalProtein=0.0;
 
         User u=userRepository.findByEmailOrUsername(username, username);
         if(u!=null){
@@ -54,6 +68,23 @@ public class DashboardService {
             else{
                 dailyDTO.setSleepDetails(null);
                 dailyDTO.setTotalHoursSleep(0);
+            }
+            List<Alimentation> a=alimentationRepository.findByUserAndMealDate(u, d);
+            List<String> nameProduct=new ArrayList<>();
+            if(a!=null){
+                for(Alimentation alimentation: a){
+                    totalCalories+=alimentation.getCalories();
+                    totalFat+=Double.parseDouble(alimentation.getFat());
+                    totalCarbos+=Double.parseDouble(alimentation.getCarbohydrates());
+                    totalProtein+=alimentation.getProteins();
+                    nameProduct.add(alimentation.getNameProduct());
+                }
+
+                dailyDTO.setTotalCaloriesConsumed(totalCalories);
+                dailyDTO.setTotalCarbosConsumed(totalCarbos);
+                dailyDTO.setAlimentationName(nameProduct);
+                dailyDTO.setTotalFatConsumed(totalFat);
+                dailyDTO.setTotalProteinConsumed(totalProtein);
             }
             return dailyDTO;
         }

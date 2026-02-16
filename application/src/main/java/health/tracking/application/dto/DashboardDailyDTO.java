@@ -14,10 +14,13 @@ import java.util.List;
 public class DashboardDailyDTO {
      int totalActivityDuration;
      int totalHoursSleep;
-     //int totalCaloriesConsumed;
+     double totalCaloriesConsumed;
+     double totalCarbosConsumed;
+     double totalFatConsumed;
+     double totalProteinConsumed;
      List<ActivityDTO> activityDetails;
      SleepDTO sleepDetails;
-    // List<AlimentationDTO> alimentationDetails;
+     List<String> alimentationName;
 
 
 }

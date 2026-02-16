@@ -23,6 +23,7 @@ const goals = ref({});
 
 const activityData = ref({});
 const sleepData = ref({});
+const alimentationData = ref([]);
 
 // Grafice
 const seriesRadial = ref([0, 0, 0]);
@@ -128,7 +129,7 @@ async function fetchChanges() {
       }
     );
     if (response.ok) {
-      //continua modificare user cu UPDATE
+      userValue.value = response.json();
     }
   } catch (e) {
     console.error(e);
@@ -185,8 +186,20 @@ async function fetchDailyData() {
     if (response.ok) {
       const data = await response.json();
 
+      console.log("data", data);
+
       activityData.value = data.activityDetails || [];
       sleepData.value = data.sleepDetails || null;
+
+      alimentationData.value = {
+        names: data.alimentationName || [],
+        stats: {
+          calories: data.totalCaloriesConsumed || 0,
+          protein: data.totalProteinConsumed || 0,
+          carbs: data.totalCarbosConsumed || 0,
+          fat: data.totalFatConsumed || 0,
+        },
+      };
 
       const activitySerial = Math.min(
         100,
@@ -197,7 +210,16 @@ async function fetchDailyData() {
         (data.totalHoursSleep / goals.value[1].targetValue) * 100
       );
 
-      seriesRadial.value = [activitySerial || 0, sleepSerial || 0, 0];
+      const alimetationSerial = Math.min(
+        100,
+        (data.totalCaloriesConsumed / goals.value[2].targetValue) * 100
+      );
+
+      seriesRadial.value = [
+        activitySerial || 0,
+        sleepSerial || 0,
+        alimetationSerial || 0,
+      ];
     }
   } catch (e) {
     console.error(e);
@@ -273,7 +295,11 @@ onMounted(() => {
               :icon="icons.sleep"
               :content="sleepData"
             />
-            <DashboardCard title="Alimentation" :icon="icons.alimentation" />
+            <DashboardCard
+              title="Alimentation"
+              :icon="icons.alimentation"
+              :content="alimentationData"
+            />
           </div>
         </div>
         <div class="w-full md:w-[300px] h-full flex flex-col gap-4">

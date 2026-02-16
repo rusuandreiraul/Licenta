@@ -29,6 +29,10 @@ public class UserController {
 
     }
 
+    //public ResponseEntity<?> changeUser(@RequestBody UserRequestDTO dto){
+
+    //}
+
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> credentials){
         UserResponseDTO dto=userService.login(credentials);
