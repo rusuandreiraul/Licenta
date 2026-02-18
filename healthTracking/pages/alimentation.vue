@@ -103,7 +103,6 @@ const goals = ref(null);
 onMounted(async () => {
   await getGoals();
   goals.value = dataGoals.value;
-  console.log("Obiective încărcate:", dataGoals.value);
 });
 
 const caloriesGoal = computed(() => {
@@ -197,7 +196,9 @@ const progressPercent = computed(() => {
         <div>
           <h1 class="p-4 font-bold text-2xl text-center">Mesele tale</h1>
         </div>
-        <div class="bg-green-200 p-4 flex justify-between items-center">
+        <div
+          class="bg-green-200 p-4 flex justify-between items-center border border-green-400 rounded"
+        >
           <div>
             <h1 class="font-bold font-2xl p-3">Mic dejun</h1>
             <img src="/micdejun.jpeg" class="h-20 rounded-2xl" />
@@ -212,7 +213,9 @@ const progressPercent = computed(() => {
             <AddModal type="alimentation" :user="user" :date="modelValueDate" />
           </div>
         </div>
-        <div class="bg-red-200 p-4 flex justify-between items-center">
+        <div
+          class="bg-red-200 p-4 flex justify-between items-center border border-red-400 rounded"
+        >
           <div>
             <h1 class="font-bold font-2xl p-3">Pranz</h1>
             <img src="/pranz.jpg" class="h-20 rounded-2xl" />
@@ -227,7 +230,9 @@ const progressPercent = computed(() => {
             <AddModal type="alimentation" :user="user" :date="modelValueDate" />
           </div>
         </div>
-        <div class="bg-blue-200 p-4 flex justify-between items-center">
+        <div
+          class="bg-blue-200 p-4 flex justify-between items-center border border-blue-400 rounded"
+        >
           <div>
             <h1 class="font-bold font-2xl p-3">Cina</h1>
             <img src="/cina.jpeg" class="h-20 rounded-2xl" />

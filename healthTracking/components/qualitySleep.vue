@@ -77,7 +77,9 @@ const chartOptions = ref({
 </script>
 
 <template>
-  <div class="radial-chart-container">
+  <div
+    class="radial-chart-container bg-white rounded-xl border shadow-md border-gray-100"
+  >
     <client-only>
       <apexchart
         type="radialBar"

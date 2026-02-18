@@ -182,121 +182,60 @@ onMounted(() => {
             <AddModal type="sleep" :user="user" :date="modelValueDate" />
           </div>
         </div>
+        <div class="grid grid-cols-2 gap-4 items-stretch">
+          <QualitySleep :quality="lastQualitySleep" class="h-full" />
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
-            <p
-              class="text-sm text-gray-500 font-medium flex items-center gap-2"
-            >
-              <UIcon name="i-lucide-bed-double" class="text-blue-500 w-5 h-5" />
-              Ore Dormite (Medie)
-            </p>
-            <p
-              class="font-extrabold text-5xl mt-2"
-              :class="{
-                'text-green-600': avgHoursSlept >= 7,
-                'text-yellow-500': avgHoursSlept >= 5 && avgHoursSlept < 7,
-                'text-red-600': avgHoursSlept < 5,
-              }"
-            >
-              {{ avgHoursSlept }}
-              <span class="text-xl font-normal text-gray-500">h</span>
-            </p>
-            <p v-if="avgHoursSlept >= 7" class="text-sm text-green-500 mt-2">
-              Excelent! Menține ritmul.
-            </p>
-            <p
-              v-else-if="avgHoursSlept > 0"
-              class="text-sm text-yellow-500 mt-2"
-            >
-              Recomandat 7-9 ore.
-            </p>
-          </div>
-
-          <div
-            class="lg:col-span-1 bg-white p-6 rounded-xl shadow-md border border-gray-100"
-          >
-            <p
-              class="text-sm text-gray-500 font-medium flex items-center gap-2"
-            >
-              <UIcon name="i-lucide-star" class="text-yellow-500 w-5 h-5" />
-              Calitate Somn (Medie)
-            </p>
-            <p
-              class="font-extrabold text-5xl mt-2"
-              :class="{
-                'text-green-600': avgQuality >= 4,
-                'text-yellow-500': avgQuality >= 3 && avgQuality < 4,
-                'text-red-600': avgQuality < 3,
-              }"
-            >
-              {{ avgQuality }}
-              <span class="text-xl font-normal text-gray-500">/5</span>
-            </p>
-            <p v-if="avgQuality >= 4" class="text-sm text-green-500 mt-2">
-              Foarte bine!
-            </p>
-            <p v-else-if="avgQuality > 0" class="text-sm text-yellow-500 mt-2">
-              Se poate îmbunătăți.
-            </p>
-          </div>
-
-          <div
-            class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md border border-gray-100 flex flex-col items-center"
-          >
-            <h4
-              class="font-bold text-lg text-gray-800 mb-4 border-b w-full text-center pb-2"
-            >
-              Calitatea Ultimului Somn
-            </h4>
-            <div class="flex items-center justify-center gap-6 w-full">
-              <div class="flex-shrink-0">
-                <QualitySleep :quality="lastQualitySleep" />
-              </div>
-
-              <div class="flex flex-col gap-2">
-                <div class="text-lg font-bold text-gray-700">
-                  {{ lastQualitySleep }} / 5
-                </div>
-                <div class="text-sm text-gray-600">
-                  <UIcon name="i-lucide-clock" class="w-4 h-4 mr-1" />
-                  Durată:
-                  <span class="font-semibold">{{ lastHoursSlept }} ore</span>
-                </div>
-                <p
-                  v-if="lastQualitySleep >= 4"
-                  class="text-sm text-green-500 font-semibold mt-1"
-                >
-                  Ai dormit excelent!
-                </p>
-                <p
-                  v-else-if="lastQualitySleep > 0"
-                  class="text-sm text-red-500 font-semibold mt-1"
-                >
-                  Încearcă să te odihnești mai bine.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="lg:col-span-4 bg-white p-6 rounded-xl shadow-md border border-gray-100"
-          >
-            <client-only>
-              <apexchart
-                :key="modelValueDate"
-                type="bar"
-                height="350"
-                :options="chartOptions"
-                :series="series"
-              />
-            </client-only>
+          <div class="grid grid-cols-2 grid-rows-2 gap-3">
             <div
-              v-if="series[0].data.every((v) => v === 0)"
-              class="text-center text-gray-500 italic mt-4 p-4 border-t"
+              class="p-4 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full"
             >
-              Nu există date de somn pentru această săptămână.
+              <span class="text-xs font-bold text-gray-500 uppercase"
+                >Stress</span
+              >
             </div>
+
+            <div
+              class="p-4 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full"
+            >
+              <span class="text-xs font-bold text-gray-500 uppercase"
+                >Durată</span
+              >
+            </div>
+
+            <div
+              class="p-4 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full"
+            >
+              <span class="text-xs font-bold text-gray-500 uppercase"
+                >Energie</span
+              >
+            </div>
+
+            <div
+              class="p-4 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full"
+            >
+              <span class="text-xs font-bold text-gray-500 uppercase"
+                >Calitate</span
+              >
+            </div>
+          </div>
+        </div>
+        <div
+          class="lg:col-span-4 bg-white p-6 rounded-xl shadow-md border border-gray-100"
+        >
+          <client-only>
+            <apexchart
+              :key="modelValueDate"
+              type="bar"
+              height="350"
+              :options="chartOptions"
+              :series="series"
+            />
+          </client-only>
+          <div
+            v-if="series[0].data.every((v) => v === 0)"
+            class="text-center text-gray-500 italic mt-4 p-4 border-t"
+          >
+            Nu există date de somn pentru această săptămână.
           </div>
         </div>
       </div>

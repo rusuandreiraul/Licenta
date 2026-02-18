@@ -3,6 +3,7 @@ import { ref, watch, onMounted } from "vue";
 import AddModal from "~/components/addModal.vue";
 import Sidebar from "~/components/Sidebar.vue";
 import { useAuth } from "~/composable/useAuth";
+import { useGoals } from "~/composable/useGoals";
 import {
   CalendarDate,
   DateFormatter,
@@ -24,12 +25,17 @@ const modelValueDate = ref(today(getLocalTimeZone()));
 
 const { user } = useAuth();
 
+const {dataGoals,getGoals} =useGoals();
+
 const activityData = ref([]);
+const activityHeaders = ["Activitate", "Durată (min)", "Dată", "Calorii (kcal)"];
 
 const activityDataAll = ref({
   calories: 0,
   duration: 0,
 });
+
+const progress=ref(null);
 
 const df = new DateFormatter("en-US", {
   dateStyle: "medium",
@@ -114,6 +120,7 @@ async function fetchActivitiesByDate() {
       }
       activityDataAll.value.calories = totalCalories;
       activityDataAll.value.duration = totalDuration;
+      progress.value=Math.min(100, (activityDataAll.value.duration/goals.value[0].targetValue)*100);
     } else {
       // Dacă răspunsul nu este OK (de ex., 404), resetăm datele
       activityData.value = [];
@@ -185,7 +192,11 @@ watch([modelValueDate, user], () => {
   }
 });
 
-onMounted(() => {
+const goals=ref(null);
+
+onMounted(async () => {
+  await getGoals();
+  goals.value=dataGoals.value;
   if (user.value) {
     fetchActivitiesByDate();
     fetchActivitySeries();
@@ -227,104 +238,51 @@ onMounted(() => {
             <AddModal type="activity" :user="user" :date="modelValueDate" />
           </div>
         </div>
+        <div class="grid grid-cols-2 justify-center items-center bg-white rounded-xl shadow-sm border border-gray-100"">
+          <div class="flex-1 flex-col p-3">
+            <svg class="w-6 h-6 text-red-600 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.122 17.645a7.185 7.185 0 0 1-2.656 2.495 7.06 7.06 0 0 1-3.52.853 6.617 6.617 0 0 1-3.306-.718 6.73 6.73 0 0 1-2.54-2.266c-2.672-4.57.287-8.846.887-9.668A4.448 4.448 0 0 0 8.07 6.31 4.49 4.49 0 0 0 7.997 4c1.284.965 6.43 3.258 5.525 10.631 1.496-1.136 2.7-3.046 2.846-6.216 1.43 1.061 3.985 5.462 1.754 9.23Z"/>
+</svg>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div
-            class="lg:col-span-1 bg-white p-6 rounded-xl shadow-md border border-gray-100 flex flex-col gap-4"
-          >
-            <h3 class="font-bold text-xl text-gray-800 mb-2">Sumar Azi</h3>
-
-            <div class="border-b pb-3">
-              <p class="text-sm text-gray-500 flex items-center gap-2">
-                <UIcon name="i-lucide-flame" class="text-red-500 w-5 h-5" />
-                Calorii Arse (Kcal)
-              </p>
-              <p class="font-extrabold text-4xl text-red-600 mt-1">
-                {{ activityDataAll.calories }}
-              </p>
+            <span class="font-bold">Calorii Arse:</span>
+            {{ activityDataAll.calories }}
+            <div v-if="activityDataAll.calories>300">
+              <i class="text-green-500">Foarte bine, azi ai facut show!</i>
             </div>
-
-            <div>
-              <p class="text-sm text-gray-500 flex items-center gap-2">
-                <UIcon name="i-lucide-clock" class="text-blue-500 w-5 h-5" />
-                Timp Total (minute)
-              </p>
-              <p class="font-extrabold text-4xl text-blue-600 mt-1">
-                {{ activityDataAll.duration }}
-              </p>
-            </div>
-
-            <h4 class="mt-4 font-bold text-lg text-gray-700 border-t pt-4">
-              Ultima Sesiune
-            </h4>
-            <div
-              v-if="activityData.length > 0"
-              class="bg-gray-50 p-4 rounded-lg flex flex-col gap-3"
-            >
-              <p class="font-semibold text-base text-gray-800">
-                {{
-                  activityData[activityData.length - 1].activityType ||
-                  "Tip Nespecificat"
-                }}
-              </p>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Calorii:</span>
-                <span class="font-bold text-red-500"
-                  >{{
-                    activityData[activityData.length - 1].calories
-                  }}
-                  Kcal</span
-                >
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-600">Durată:</span>
-                <span class="font-bold text-blue-500"
-                  >{{
-                    activityData[activityData.length - 1].duration
-                  }}
-                  min</span
-                >
-              </div>
-            </div>
-            <div
-              v-else
-              class="text-gray-500 italic text-sm p-4 bg-gray-50 rounded-lg"
-            >
-              Nicio sesiune înregistrată azi.
+            <div v-else>
+              <i class="text-red-500">Continua tot asa si treci peste obiectiv</i>
             </div>
           </div>
+          <div class="flex-1 flex-col p-3">
+            <svg class="w-6 h-6 text-blue-600 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+</svg>
 
-          <div
-            class="lg:col-span-3 bg-white p-6 rounded-xl shadow-md border border-gray-100"
-          >
-            <client-only>
-              <apexchart
-                :key="modelValueDate"
-                type="area"
-                height="320"
-                :options="chartOptions"
-                :series="series"
-              />
-            </client-only>
-          </div>
-
-          <div
-            class="lg:col-span-4 bg-white p-6 rounded-xl shadow-md border border-gray-100"
-          >
-            <h2 class="font-bold text-xl text-gray-800 mb-4">
-              Detaliile Tuturor Sesiunilor
-            </h2>
-            <Table
-              :content="activityData"
-              :headers="['Tip Exercițiu', 'Calorii', 'Durată (min)']"
-            />
-            <div
-              v-if="activityData.length === 0"
-              class="text-center text-gray-500 italic mt-4 p-4 border-t"
-            >
-              Nu există activități înregistrate pentru această dată.
+            <span class="font-bold">
+              Durata totala:
+            </span>
+            {{ activityDataAll.duration }}
+            <div class="mt-2">
+              <i>Progres: {{ progress }} %</i>
+              <UProgress v-model="progress" color="info"/>
             </div>
+
           </div>
+          
+        </div>
+       
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <client-only>
+            <apexchart
+              width="100%"
+              height="350"
+              :options="chartOptions"
+              :series="series"
+            ></apexchart>
+          </client-only>
+        </div>
+        <div>
+          <Table  :headers="activityHeaders" :content="activityData"/>
         </div>
       </div>
 
