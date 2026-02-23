@@ -98,7 +98,7 @@ async function fetchSleepByDateRange() {
 
     if (response.ok) {
       const dataSleep = await response.json();
-
+      console.log("data sleep: ", dataSleep);
       if (dataSleep.length === 0) {
         // Resetăm valorile dacă nu sunt date
         avgQuality.value = 0;

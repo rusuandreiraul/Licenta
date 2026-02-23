@@ -19,8 +19,9 @@ public interface SleepRepository extends JpaRepository<Sleep, Long> {
         SELECT new health.tracking.application.dto.SleepDTO(
              s.quality,
             s.hoursSlept,
-            s.dateSleep
-           
+            s.dateSleep,
+            s.morningEnergy,
+            s.stress
            )
         FROM Sleep s
         WHERE s.user.username = :username

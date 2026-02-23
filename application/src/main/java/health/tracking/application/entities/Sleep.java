@@ -27,8 +27,11 @@ public class Sleep {
     private int hoursSlept;
     private LocalDate dateSleep;
     private int quality;
+    @Column(name = "stress")
     private int stress;
+    @Column(name = "morning_energy")
     private int morningEnergy;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

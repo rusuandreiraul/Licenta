@@ -17,5 +17,7 @@ public class SleepDTO {
     private int quality;
     private int hoursSlept;
     private LocalDate dateSleep;
+    private int stress;
+    private int morningEnergy;
 
 }

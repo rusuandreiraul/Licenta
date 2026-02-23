@@ -238,7 +238,7 @@ watch(date, (newDate) => {
   week.value = getLastWeekDates(newDate);
   chartOptionsBar.value.xaxis.categories = week.value;
   fetchDailyData();
-  fetchWeekData();
+  //fetchWeekData();
 });
 
 onMounted(() => {
