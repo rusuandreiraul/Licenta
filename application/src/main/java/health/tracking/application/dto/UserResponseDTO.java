@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponseDTO {
+    private Long id;
     private String username;
     private double height;
     private double weight;

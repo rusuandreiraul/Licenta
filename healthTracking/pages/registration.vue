@@ -24,7 +24,7 @@ async function registerUser() {
 
     if (response.ok) {
       message.value = "Te-ai inregistrat cu success!";
-      router.push("/dashboard");
+      router.push("/index");
     } else {
       message.value = "Ceva nu a functionat corect, mai incerca!";
     }

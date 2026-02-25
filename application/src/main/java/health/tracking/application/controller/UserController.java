@@ -4,6 +4,7 @@ import health.tracking.application.dto.UserRequestDTO;
 import health.tracking.application.dto.UserResponseDTO;
 import health.tracking.application.service.UserService;
 import lombok.Getter;
+import org.mapstruct.control.MappingControl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,18 @@ public class UserController {
         else
             return ResponseEntity.badRequest().body("Date invalide. Verifică valorile introduse!");
 
+    }
+
+
+    @GetMapping("/search-user/{username}")
+    public UserResponseDTO searchUser(@PathVariable String username){
+        UserResponseDTO response=userService.getUser(username);
+        if(response !=null){
+            return response;
+        }
+        else{
+            return null;
+        }
     }
 
     //public ResponseEntity<?> changeUser(@RequestBody UserRequestDTO dto){
