@@ -90,7 +90,6 @@ async function getUsers() {
                   <ULink :to="`/${f.username}`">
                     {{ f.username }}
                   </ULink>
-                  <UButton>Follow</UButton>
                 </div>
               </li>
             </ul>

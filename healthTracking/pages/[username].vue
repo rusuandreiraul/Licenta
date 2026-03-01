@@ -1,6 +1,47 @@
 <script setup>
+import { useAuth } from "~/composable/useAuth";
+
 const route = useRoute();
 const username = route.params.username;
+
+const { user } = useAuth();
+
+const loggedUser = user.value;
+
+const isFollowed = ref(false);
+
+async function checkFollow() {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/check-follow/${loggedUser}/${username}`
+    );
+    if (response.ok) {
+      isFollowed.value = await response.json();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function followUser() {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/follow-user/${loggedUser}/${username}`
+    );
+
+    if (response.ok) {
+      isFollowed.value = !isFollowed.value;
+      const res = await response.text();
+      console.log(res);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+onMounted(() => {
+  checkFollow();
+});
 </script>
 
 <template>
@@ -21,7 +62,13 @@ const username = route.params.username;
         <div>
           <h1 class="font-bold text-xl">{{ username }}</h1>
           <div class="flex gap-2 mt-2 justify-center">
-            <UButton variant="solid">Follow</UButton>
+            <UButton
+              v-if="isFollowed === false"
+              variant="solid"
+              @click="followUser()"
+              >Follow</UButton
+            >
+            <UButton v-else @click="followUser()">Unfollow</UButton>
             <UButton variant="outline">Message</UButton>
           </div>
         </div>

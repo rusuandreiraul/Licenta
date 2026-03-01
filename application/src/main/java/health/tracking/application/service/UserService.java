@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDate;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class UserService {
@@ -69,4 +70,39 @@ public class UserService {
     }
 
 
+    public String followUser(String loggedUser,String username) {
+        if(Objects.equals(loggedUser, username)){
+            return "Eroare";
+        }
+
+        User logUser=userRepository.findByEmailOrUsername(loggedUser, loggedUser);
+        User user=userRepository.findByEmailOrUsername(username,username);
+
+        if(logUser.getFollowing().contains(user)){
+            logUser.getFollowing().remove(user);
+            userRepository.save(logUser);
+            return "Unfollow";
+        }
+        else{
+            logUser.getFollowing().add(user);
+            userRepository.save(logUser);
+            return "Followed";
+        }
+
+
+
+
+    }
+
+    public Boolean checkStatus(String loggedUser, String username) {
+        User logUser=userRepository.findByEmailOrUsername(loggedUser, loggedUser);
+        User user=userRepository.findByEmailOrUsername(username,username);
+
+        if(logUser.getFollowing().contains(user)){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }

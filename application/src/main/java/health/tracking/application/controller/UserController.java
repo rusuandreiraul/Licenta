@@ -68,4 +68,18 @@ public class UserController {
         }
     }
 
+    //FOLLOW USER
+
+    @GetMapping("/follow-user/{loggedUser}/{username}")
+    private ResponseEntity<?> followUser(@PathVariable String loggedUser, @PathVariable String username){
+        String response=userService.followUser(loggedUser,username);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/check-follow/{loggedUser}/{username}")
+    private ResponseEntity<Boolean> checkFollow(@PathVariable String loggedUser, @PathVariable String username){
+        Boolean status=userService.checkStatus(loggedUser, username);
+        return ResponseEntity.ok(status);
+    }
+
 }
