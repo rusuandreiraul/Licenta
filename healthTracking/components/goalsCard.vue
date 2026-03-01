@@ -2,6 +2,8 @@
 import { ref } from "vue";
 import { useAuth } from "~/composable/useAuth";
 
+const props = defineProps(["targetUsername"]);
+
 const { user } = useAuth();
 
 const username = user.value;
@@ -18,9 +20,15 @@ const state = ref({
 });
 async function fetchGoals() {
   try {
-    const response = await fetch(`http://localhost:8080/goals/${username}`, {
-      method: "GET",
-    });
+    if (!props.targetUsername) {
+      return;
+    }
+    const response = await fetch(
+      `http://localhost:8080/goals/${props.targetUsername}`,
+      {
+        method: "GET",
+      }
+    );
 
     if (response.ok) {
       goals.value = await response.json();
@@ -73,6 +81,14 @@ const getGoalTarget = (type) => {
 
   return goal ? goal.targetValue : "-";
 };
+
+watch(
+  () => props.targetUsername,
+  (newVal) => {
+    if (newVal) fetchGoals();
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
   fetchGoals();
@@ -143,9 +159,8 @@ onMounted(() => {
         <p>{{ getGoalTarget("Alimentation") }} kcal</p>
       </div>
     </div>
-
     <template #footer>
-      <UModal>
+      <UModal v-if="user === props.targetUsername">
         <UButton label="Edit Goals" />
 
         <template #content>
@@ -167,6 +182,9 @@ onMounted(() => {
           </form>
         </template>
       </UModal>
+      <p v-else class="text-xs italic text-center text-gray-500">
+        Vizualizezi obiectivele lui {{ props.targetUsername }}
+      </p>
     </template>
   </UCard>
 </template>

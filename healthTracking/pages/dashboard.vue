@@ -373,7 +373,10 @@ onMounted(() => {
           </div>
 
           <div>
-            <GoalsCard @goalsUpdated="refreshFetch" />
+            <GoalsCard
+              :targetUsername="username"
+              @goalsUpdated="refreshFetch"
+            />
           </div>
 
           <!-- Calendar separat jos -->

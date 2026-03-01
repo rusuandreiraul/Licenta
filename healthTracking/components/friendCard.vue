@@ -70,7 +70,7 @@
           type="button"
           class="inline-flex items-center text-black bg-brand box-border border border- hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
         >
-          Share
+          Challenge
         </button>
         <button
           type="button"

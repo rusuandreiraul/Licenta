@@ -85,10 +85,13 @@ async function getUsers() {
           <div v-if="friendList">
             <!--informatii despre userii gasiti sa le pot da follow-->
             <ul>
-              <li v-for="f in friendList" :key="f.id">
-                <ULink :to="`/${f.username}`">
-                  {{ f.username }}
-                </ULink>
+              <li v-for="f in friendList" :key="f.id" class="text-center">
+                <div class="flex justify-between">
+                  <ULink :to="`/${f.username}`">
+                    {{ f.username }}
+                  </ULink>
+                  <UButton>Follow</UButton>
+                </div>
               </li>
             </ul>
           </div>
