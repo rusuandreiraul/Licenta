@@ -103,7 +103,12 @@ async function getUsers() {
         <div
           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mx-auto px-4"
         >
-          <FriendCard />
+          <FriendCard
+            user="andreirusu"
+            content="azi am terminat obiectivul de sleep"
+            urlImage="imagine"
+            createDate="2025 / 03 / 04"
+          />
           <friendCard />
           <friendCard />
         </div>

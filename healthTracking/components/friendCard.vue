@@ -1,3 +1,12 @@
+<script setup>
+const props = defineProps({
+  user: String,
+  content: String,
+  urlImage: String,
+  createDate: String,
+});
+</script>
+
 <template>
   <div
     class="relative bg-neutral-primary-soft max-w-xs w-full p-6 border border-default rounded-base shadow-xs"
@@ -62,9 +71,10 @@
       <div class="relative">iconita cu strikeul cu persoana respectiva</div>
       <img class="w-24 h-24 mb-6 rounded-full" alt="Bonnie image" />
       <h5 class="mb-0.5 text-xl font-semibold tracking-tight text-heading">
-        Bonnie Green
+        {{ props.user }}
       </h5>
-      <span class="text-sm text-body">textul</span>
+      <span class="text-sm text-body">{{ props.content }}</span>
+      <span class="text-sm text-body">{{ props.createDate }}</span>
       <div class="flex mt-4 md:mt-6 gap-4">
         <button
           type="button"
