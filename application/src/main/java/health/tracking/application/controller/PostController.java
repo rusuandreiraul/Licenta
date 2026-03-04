@@ -7,10 +7,11 @@ import health.tracking.application.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000/")
@@ -27,6 +28,15 @@ public class PostController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/get-posts/{username}")
+    public ResponseEntity<?> getPosts(@PathVariable String username){
+        List<PostResponseDTO> posts=postService.findAllPostsByDate(username,LocalDate.now());
+        if(posts.isEmpty()){
+            return ResponseEntity.ok(new ArrayList<PostResponseDTO>());
+        }
+        return ResponseEntity.ok(posts);
     }
 
 }

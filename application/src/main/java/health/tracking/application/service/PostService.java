@@ -12,6 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -37,4 +42,14 @@ public class PostService {
            Post savedPost= postRepository.save(p);
             return postMapper.toDto(savedPost);
         }
+
+    public List<PostResponseDTO> findAllPostsByDate(String username,LocalDate now) {
+        User u=userRepository.findByEmailOrUsername(username, username);
+        if(u==null){
+             return new ArrayList<>();
+        }
+        Set<User> follow=u.getFollowing();
+        List<Post> l=postRepository.findAllByPublishDateAndUserIn(now, follow);
+        return l.stream().map(post->postMapper.toDto(post)).collect(Collectors.toList());
+    }
 }

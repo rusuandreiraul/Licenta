@@ -12,6 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostResponseDTO {
+    private Long id;
     private String username;
     private String urlImage;
     private String content;

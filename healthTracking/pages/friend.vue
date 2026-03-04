@@ -1,8 +1,13 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import friendCard from "~/components/friendCard.vue";
+import { useAuth } from "~/composable/useAuth";
 const friendName = ref("");
 const friendList = ref([]);
+
+const { user } = useAuth();
+
+const posts = ref([]);
 
 async function getUsers() {
   try {
@@ -20,11 +25,29 @@ async function getUsers() {
     console.error(e);
   }
 }
+
+async function getPosts() {
+  try {
+    const response = await fetch(
+      `http://localhost:8080/get-posts/${user.value}`
+    );
+    if (response.ok) {
+      posts.value = await response.json();
+      console.log(posts);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+onMounted(() => {
+  getPosts();
+});
 </script>
 
 <template>
   <Sidebar />
-  <main class="flex-1 p-4 sm:ml-64 flex gap-6 bg-gray-100">
+  <main class="flex-1 p-4 sm:ml-64 flex gap-6 bg-gray-100 min-h-screen">
     <div class="flex flex-col gap-2 p-2 bg-white w-full">
       <div
         class="flex flex-col lg:flex-row p-4 gap-6 bg-white w-full items-center lg:items-end justify-between border border-green-500 rounded-xl shadow-sm"
@@ -97,20 +120,48 @@ async function getUsers() {
         </div>
       </div>
       <div>
-        <div class="mb-6">
+        <div class="mb-6 flex flex-col relative">
           <h1 class="font-bold text-2xl p-3 text-center">My Feed</h1>
+          <div class="absolute top-2 right-0">
+            <UModal>
+              <UButton
+                label="Adauga Postare"
+                color="green"
+                variant="subtle"
+                icon="i-lucide-plus"
+              />
+              <template #content>
+                <div class="p-4">
+                  <h3 class="mb-4 font-bold">Creează o postare nouă</h3>
+                  <UTextarea
+                    v-model="newPostContent"
+                    placeholder="Ce ai reușit astăzi?"
+                  />
+                  <UButton class="mt-4 w-full" @click="sendPost"
+                    >Postează</UButton
+                  >
+                </div>
+              </template>
+            </UModal>
+          </div>
         </div>
         <div
           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center mx-auto px-4"
         >
-          <FriendCard
-            user="andreirusu"
-            content="azi am terminat obiectivul de sleep"
-            urlImage="imagine"
-            createDate="2025 / 03 / 04"
+          <friendCard
+            v-for="p in posts"
+            :key="p.id"
+            :user="p.username"
+            :content="p.content"
+            :urlImage="p.urlImage"
+            :createDate="p.publishDate"
           />
-          <friendCard />
-          <friendCard />
+          <div
+            v-if="posts.length === 0"
+            class="col-span-full py-10 text-gray-400 italic"
+          >
+            Nu sunt postari de afisat pentru ziua de azi.
+          </div>
         </div>
       </div>
     </div>
