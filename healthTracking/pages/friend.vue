@@ -9,6 +9,8 @@ const { user } = useAuth();
 
 const posts = ref([]);
 
+const postContent = ref("");
+
 async function getUsers() {
   try {
     const response = await fetch(
@@ -20,6 +22,30 @@ async function getUsers() {
     if (response.ok) {
       const data = await response.json();
       friendList.value = [data]; //aici va trebuie sa vad cum sa fac sa returnez daca caut pop sa returneze tot cei care incep cu pop
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function sendPost() {
+  try {
+    const postPayload = {
+      username: user.value,
+      content: postContent.value,
+    };
+
+    const response = await fetch(`http://localhost:8080/add-post`, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(postPayload),
+    });
+
+    if (response.ok) {
+      postContent.value = "";
+      await getPosts();
     }
   } catch (e) {
     console.error(e);
@@ -134,7 +160,7 @@ onMounted(() => {
                 <div class="p-4">
                   <h3 class="mb-4 font-bold">Creează o postare nouă</h3>
                   <UTextarea
-                    v-model="newPostContent"
+                    v-model="postContent"
                     placeholder="Ce ai reușit astăzi?"
                   />
                   <UButton class="mt-4 w-full" @click="sendPost"
