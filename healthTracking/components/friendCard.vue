@@ -1,6 +1,6 @@
 <script setup>
 const props = defineProps({
-  user: String,
+  username: String,
   content: String,
   urlImage: String,
   createDate: String,
@@ -68,10 +68,10 @@ const props = defineProps({
       </ul>
     </div>
     <div class="flex flex-col items-center">
-      <div class="relative">iconita cu strikeul cu persoana respectiva</div>
+      <div class="absolute left-2 top-2">strike</div>
       <img class="w-24 h-24 mb-6 rounded-full" alt="Bonnie image" />
       <h5 class="mb-0.5 text-xl font-semibold tracking-tight text-heading">
-        {{ props.user }}
+        {{ props.username }}
       </h5>
       <span class="text-sm text-body">{{ props.content }}</span>
       <span class="text-sm text-body">{{ props.createDate }}</span>

@@ -177,7 +177,7 @@ onMounted(() => {
           <friendCard
             v-for="p in posts"
             :key="p.id"
-            :user="p.username"
+            :username="p.username"
             :content="p.content"
             :urlImage="p.urlImage"
             :createDate="p.publishDate"
