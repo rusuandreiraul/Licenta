@@ -39,4 +39,13 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
+    @GetMapping("posts/{username}")
+    public ResponseEntity<?> getPostsUser(@PathVariable String username){
+        List<PostResponseDTO> posts=postService.findAllPostsByUser(username);
+        if(posts.isEmpty()){
+            return ResponseEntity.ok(new ArrayList<>());
+        }
+        return ResponseEntity.ok(posts);
+    }
+
 }

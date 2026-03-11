@@ -10,6 +10,8 @@ const loggedUser = user.value;
 
 const isFollowed = ref(false);
 
+const posts = ref([]);
+
 async function checkFollow() {
   try {
     const response = await fetch(
@@ -39,8 +41,21 @@ async function followUser() {
   }
 }
 
+async function getPosts() {
+  try {
+    const response = await fetch(`http://localhost:8080/posts/${username}`);
+
+    if (response.ok) {
+      posts.value = await response.json();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 onMounted(() => {
   checkFollow();
+  getPosts();
 });
 </script>
 
@@ -79,7 +94,14 @@ onMounted(() => {
 
     <div class="p-10 mt-5 border border-gray-100 shadow-xl w-full">
       <h1 class="font-bold">Feed</h1>
-      <FriendCard />
+      <friendCard
+        v-for="p in posts"
+        :key="p.id"
+        :username="p.username"
+        :content="p.content"
+        :urlImage="p.urlImage"
+        :createDate="p.publishDate"
+      />
     </div>
   </div>
 </template>

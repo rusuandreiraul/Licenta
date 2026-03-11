@@ -52,4 +52,13 @@ public class PostService {
         List<Post> l=postRepository.findAllByPublishDateAndUserIn(now, follow);
         return l.stream().map(post->postMapper.toDto(post)).collect(Collectors.toList());
     }
+
+    public List<PostResponseDTO> findAllPostsByUser(String username) {
+        User u=userRepository.findByEmailOrUsername(username,username);
+        if(u==null){
+            return new ArrayList<>();
+        }
+        List<Post> postList=postRepository.findAllByUser(u);
+        return postList.stream().map(post->postMapper.toDto(post)).toList();
+    }
 }

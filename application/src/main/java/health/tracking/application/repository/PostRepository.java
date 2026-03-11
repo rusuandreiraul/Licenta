@@ -13,4 +13,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     List<Post> findAllByPublishDateAndUserIn(LocalDate now, Set<User> follow);
+
+    List<Post> findAllByUser(User u);
 }

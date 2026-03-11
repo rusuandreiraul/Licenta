@@ -59,7 +59,6 @@ async function getPosts() {
     );
     if (response.ok) {
       posts.value = await response.json();
-      console.log(posts);
     }
   } catch (e) {
     console.error(e);
