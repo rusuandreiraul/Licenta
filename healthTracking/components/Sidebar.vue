@@ -218,8 +218,8 @@ const isActive = (path) => route.path === path;
           </a>
         </li>
         <li class="absolute bottom-2">
-          <a
-            href="/myAccount"
+          <ULink
+            :to="`/${user.user.value}`"
             :class="[
               'flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group',
               isActive('/myAccount')
@@ -245,8 +245,8 @@ const isActive = (path) => route.path === path;
               />
             </svg>
 
-            <span class="flex-1 ms-3 whitespace-nowrap">My account</span>
-          </a>
+            <span class="flex-1 ms-3 whitespace-nowrap"> My account </span>
+          </ULink>
         </li>
       </ul>
     </div>

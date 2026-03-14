@@ -6,6 +6,8 @@ const username = route.params.username;
 
 const { user } = useAuth();
 
+const isChatOpen = ref(false);
+
 const loggedUser = user.value;
 
 const isFollowed = ref(false);
@@ -76,7 +78,10 @@ onMounted(() => {
         />
         <div>
           <h1 class="font-bold text-xl">{{ username }}</h1>
-          <div class="flex gap-2 mt-2 justify-center">
+          <div
+            v-if="loggedUser != username"
+            class="flex gap-2 mt-2 justify-center"
+          >
             <UButton
               v-if="isFollowed === false"
               variant="solid"
@@ -84,7 +89,13 @@ onMounted(() => {
               >Follow</UButton
             >
             <UButton v-else @click="followUser()">Unfollow</UButton>
-            <UButton variant="outline">Message</UButton>
+            <USlideover title="Chat">
+              <UButton label="Message" color="neutral" variant="outline" />
+
+              <template #body>
+                <MessageChat />
+              </template>
+            </USlideover>
           </div>
         </div>
       </div>

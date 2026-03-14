@@ -51,9 +51,9 @@ public class UserStreakService {
         return userStreakMapper.toDto(newStreak);
     }
  //aici verific daca ambii si-au facut obiectivele
-    private boolean bothCloseGoals(User u1, User u2) {
+    //private boolean bothCloseGoals(User u1, User u2) {
 
-    }
+    //}
 }
 
 
