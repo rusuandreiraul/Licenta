@@ -11,4 +11,6 @@ public interface AlimentationRepository extends JpaRepository<Alimentation, Long
 
 
     List<Alimentation> findByUserAndMealDate(User u, LocalDate d);
+
+    double findCaloriesByUserAndMealDate(User u1, LocalDate date);
 }

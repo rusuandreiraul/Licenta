@@ -43,4 +43,6 @@ public interface SleepRepository extends JpaRepository<Sleep, Long> {
     ORDER BY s.dateSleep ASC
 """)
     List<Integer> findQualityByUserAndDateRange(@Param("user") User u,@Param("startDate") LocalDate startDate,@Param("endDate") LocalDate d);
+
+    int findHoursSleptByUserAndDateSleep(User u2, LocalDate date);
 }

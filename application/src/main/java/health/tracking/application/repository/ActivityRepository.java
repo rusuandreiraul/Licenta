@@ -48,5 +48,9 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     ORDER BY a.activityDate ASC
 """)
     List<Integer> findCaloriesByUserAndDateRange(@Param("user") User u,@Param("startDate") LocalDate startDate,@Param("endDate") LocalDate d);
+
+
+
+    int findDurationByUserAndActivityDate(User u2, LocalDate date);
 }
 
