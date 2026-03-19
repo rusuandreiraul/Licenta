@@ -8,9 +8,7 @@
 
 const message=ref("");
 
-async function sendMessage(){
-  const response=await fetch("api/message/sendMessage",......
-}
+
 
 
 </script>
