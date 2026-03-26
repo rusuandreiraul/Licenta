@@ -28,5 +28,6 @@ public class Conversation {
 
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
+    @ToString.Exclude //relatie circulara
     private List<Message> messages;
 }

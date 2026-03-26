@@ -13,6 +13,7 @@
     "@nuxt/eslint": "^1.9.0",
     "@nuxt/image": "^1.11.0",
     "@nuxt/ui": "^4.0.1",
+    "@stomp/stompjs": "^7.3.0",
     "apexcharts": "^3.46.0",
     "eslint": "^9.36.0",
     "flowbite": "^3.1.2",

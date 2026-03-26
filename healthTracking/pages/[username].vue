@@ -93,7 +93,7 @@ onMounted(() => {
               <UButton label="Message" color="neutral" variant="outline" />
 
               <template #body>
-                <MessageChat />
+                <MessageChat :receiver="{username}" />
               </template>
             </USlideover>
           </div>
