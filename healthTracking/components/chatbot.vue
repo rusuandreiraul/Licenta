@@ -14,25 +14,28 @@ function sendMessage() {
 
   userMessage.value = "";
 
-  // apel backend / AI
-  fetchInformationFromAI();
+  fetchInformationFromAI(); //trimitem mesajul userului catre backend sa gestioneze AI
 }
 
 async function fetchInformationFromAI() {
-  const lastMessage = messages.value[messages.value.length - 1];
+  const lastMessageText = messages.value[messages.value.length - 1].parts[0].text;
+  try{
+    const response=await fetch("http://localhost:8080/api/ai/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json"},
+      body: JSON.stringify({message:lastMessageText})
+    });
+    const data=await response.json();
 
-  // simulăm răspuns AI (în realitate aici apelezi backend-ul)
-  const aiResponse = {
-    id: crypto.randomUUID(),
-    role: "assistant",
-    parts: [{ type: "text", text: "Aceasta este o răspuns simulată." }],
-  };
-
-  // adăugăm răspunsul AI după un delay
-  setTimeout(() => {
-    messages.value.push(aiResponse);
-    scrollToBottom();
-  }, 500);
+    messages.value.push({
+      id:crypto.randomUUID(),
+      role: "assistant",
+      parts: [{ type: "text", text: data.text }],
+    })
+  }
+  catch(err){
+    console.error(err);
+  }
 }
 </script>
 

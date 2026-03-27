@@ -1,6 +1,9 @@
 <script setup>
 import {useAuth} from "~/composable/useAuth.js";
 
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
+
 const chatMessages = ref([]);
 const message=ref("");
 
@@ -14,11 +17,11 @@ let stompClient=null;
 
 function connect() {
   const socket=new SockJS("http://localhost:8080/gs-guide-websocket");
-  stompClient=new Stomp.over(socket);
+  stompClient=Stomp.over(socket);
   stompClient.connect(() => { //ne  abonam pentru mesajele noi
     stompClient.subscribe("/user/queue/messages", (message) => {
       const receivedMessage = JSON.parse(message.body); //message este mesajul primit din backend
-      chatMessage.push(receivedMessage); //userul care primeste trebuie sa se "aboneze" sa primeasca mesajul
+      chatMessage.value.push(receivedMessage); //userul care primeste trebuie sa se "aboneze" sa primeasca mesajul
     })
   });
 
@@ -64,8 +67,9 @@ onUnmounted(() => { //inchide socketul cand iesim
   <UChatMessages :messages="chatMessages"/>
 
     <div class="absolute bottom-0 center bg-white">
-      <form>
-        <UInput v-model="message"/>  <!-- verifica partea de mesaje si cum functioneaza cu componenta-->
+      <form @submit.prevent="sendMessage">
+        <UInput v-model="message" placeholder="Scrie un mesaj..." />
+        <Button type="submit">Trimite</Button>
       </form>
     </div>
   </div>
