@@ -39,7 +39,7 @@ public class ActivityService {
 
         }
         else{
-            return null;
+            return new ArrayList<>();
         }
     }
 

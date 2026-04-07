@@ -7,15 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
-@CrossOrigin(origins = "http://localhost:3000/")
+@RestController
+@CrossOrigin(origins = "http://localhost:3000/", allowCredentials = "true")
 public class MessageController { //este controllerul care gestioneaza partea de mesaje cu wbesocket
 
 
@@ -29,16 +31,20 @@ public class MessageController { //este controllerul care gestioneaza partea de 
     }
 
     @MessageMapping("/send")
-    public void processMessage(@Payload MessageDTO messageDTO){
+    public void processMessage(@Payload MessageDTO messageDTO, Authentication authentication){
+        String sender=authentication.getName();
+
+        messageDTO.setSender(sender);
         Message m=messageService.saveMessage(messageDTO);
         messagingTemplate.convertAndSendToUser(messageDTO.getReceiver(),
                 "/queue/messages",
                 m);//acesta este payloadul care va trimis catre frontend
     }
 
-    @GetMapping("/get-messages/{sender}/{receiver}")
-    public List<MessageDTO> getMessages(@PathVariable String sender, @PathVariable String receiver){
-        List<MessageDTO> messageList;
-        return messageList=messageService.findAllMessages(sender, receiver);
+    @GetMapping("/chat-history/{receiver}")
+    public List<MessageDTO> getMessages(@PathVariable String receiver, Authentication authentication){
+        String sender=authentication.getName();
+        System.out.println("DEBUG: SENDER E: " + sender);
+        return messageService.findAllMessages(sender, receiver);
     }
 }

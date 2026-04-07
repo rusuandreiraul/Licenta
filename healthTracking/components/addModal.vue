@@ -1,12 +1,14 @@
 <script setup>
 import { ref, onMounted } from "vue";
+import {useAuth} from "~/composable/useAuth.js";
 
 const props = defineProps({
   type: { type: String, required: true },
-  user: { type: String, required: true, default: "" },
   date: { type: String, required: true },
   modalId: { type: String, default: "default-modal" },
 });
+
+const {token}=useAuth();
 
 const items = ref(["Mic dejun", "Pranz", "Cina"]);
 
@@ -93,20 +95,20 @@ async function handleSubmit() {
   let body = {};
 
   if (props.type === "activity") {
-    url = `http://localhost:8080/dashboard-activity/${props.user}/${props.date}`;
+    url = `http://localhost:8080/dashboard-activity/${props.date}`;
     body = {
       calories: form.value.calories,
       duration: form.value.duration,
       activityType: form.value.exerciseType,
     };
   } else if (props.type === "sleep") {
-    url = `http://localhost:8080/dashboard-sleep/${props.user}/${props.date}`;
+    url = `http://localhost:8080/dashboard-sleep/${props.date}`;
     body = {
       quality: form.value.quality,
       hoursSlept: form.value.hoursSlept,
     };
   } else if (props.type === "alimentation") {
-    url = `http://localhost:8080/dashboard-alimentation/${props.user}/${props.date}`;
+    url = `http://localhost:8080/dashboard-alimentation/${props.date}`;
     body = {
       carbohydrates: form.value.carbohydrates,
       calories: form.value.caloriesMeal,
@@ -120,7 +122,10 @@ async function handleSubmit() {
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        'Authorization': `Bearer ${token.value}` //luam tokenul
+      },
       body: JSON.stringify(body),
     });
 

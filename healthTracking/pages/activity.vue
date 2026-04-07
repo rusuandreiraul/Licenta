@@ -23,7 +23,7 @@ const series = ref([
 
 const modelValueDate = ref(today(getLocalTimeZone()));
 
-const { user } = useAuth();
+const { user, token } = useAuth();
 
 const {dataGoals,getGoals} =useGoals();
 
@@ -92,22 +92,25 @@ async function fetchActivitiesByDate() {
   activityDataAll.value.calories = 0;
   activityDataAll.value.duration = 0;
 
-  if (!user.value) return;
+  if (!token.value) return;
 
-  const username = user.value;
   const selectedDate = modelValueDate.value.toString(); // Asigurăm formatul string
 
+  console.log(selectedDate);
   try {
     const response = await fetch(
-      `http://localhost:8080/dashboard-activity/${username}/${selectedDate}`,
+      `http://localhost:8080/dashboard-activity/${selectedDate}`,
       {
         method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token.value}`
+        }
       }
     );
-
     if (response.ok) {
       activityData.value = await response.json();
-
+    console.log(activityData);
       // Calculăm sumarul total
       let totalCalories = 0;
       let totalDuration = 0;
@@ -136,15 +139,21 @@ async function fetchActivitiesByDate() {
 }
 
 async function fetchActivitySeries() {
-  if (!user.value) return;
+  if (!token.value) return;
 
   try {
-    const username = user.value;
     const selectedDate = modelValueDate.value.toString();
 
     const response = await fetch(
-      `http://localhost:8080/chart-series/${username}/${selectedDate}`,
-      { method: "GET" }
+      `http://localhost:8080/chart-series/${selectedDate}`,
+      {
+        method: "GET",
+        headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${token.value}`
+      }
+
+      }
     );
 
     if (response.ok) {
@@ -235,7 +244,7 @@ onMounted(async () => {
             <p class="text-sm font-semibold text-gray-700 hidden sm:block">
               Înregistrează o activitate:
             </p>
-            <AddModal type="activity" :user="user" :date="modelValueDate" />
+            <AddModal type="activity" :date="modelValueDate" />
           </div>
         </div>
         <div class="grid grid-cols-2 justify-center items-center bg-white rounded-xl shadow-sm border border-gray-100 items-start"">

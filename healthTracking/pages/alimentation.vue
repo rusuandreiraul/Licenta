@@ -14,6 +14,8 @@ import { isEmpty } from "@nuxt/ui/runtime/utils/index.js";
 
 const { user } = useAuth();
 
+const {token}=useAuth();
+
 const { dataGoals, getGoals } = useGoals();
 
 const { getLastWeekDates } = useDateWeek();
@@ -55,11 +57,14 @@ const dinner = ref([]);
 
 async function fetchAlimentationByDate() {
   const selectedDate = modelValueDate.value.toString();
-  const username = user.value;
   const response = await fetch(
-    `http://localhost:8080/alimentation-data/${username}/${selectedDate}`,
+    `http://localhost:8080/alimentation-data/${selectedDate}`,
     {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.value}`,
+      }
     }
   );
   if (response.ok) {

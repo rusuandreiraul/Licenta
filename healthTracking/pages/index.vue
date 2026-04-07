@@ -21,7 +21,7 @@ async function loginUser() {
   });
   if (response.ok) {
     const data = await response.json();
-    login(data.username);
+    login(data.username, data.token);
     router.push("/dashboard");
   } else {
     console.log("eroare", "eroare");

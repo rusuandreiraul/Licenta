@@ -5,7 +5,7 @@ import { useAuth } from "~/composable/useAuth";
 const friendName = ref("");
 const friendList = ref([]);
 
-const { user } = useAuth();
+const { user, token } = useAuth();
 
 const posts = ref([]);
 
@@ -17,6 +17,9 @@ async function getUsers() {
       `http://localhost:8080/search-user/${friendName.value}`,
       {
         method: "GET",
+        headers: { "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.value}`
+        },
       }
     );
     if (response.ok) {
@@ -39,6 +42,10 @@ async function sendPost() {
       method: "POST",
       headers: {
         "Content-type": "application/json",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token.value}`
+        },
       },
       body: JSON.stringify(postPayload),
     });
@@ -55,7 +62,13 @@ async function sendPost() {
 async function getPosts() {
   try {
     const response = await fetch(
-      `http://localhost:8080/get-posts/${user.value}`
+      `http://localhost:8080/get-posts`,{
+        method: "GET",
+          headers: {
+          "Content-Type": "application/json",
+            "Authorization": `Bearer ${token.value}`
+          }
+        }
     );
     if (response.ok) {
       posts.value = await response.json();

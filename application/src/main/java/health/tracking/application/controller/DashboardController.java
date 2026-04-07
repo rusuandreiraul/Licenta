@@ -5,6 +5,7 @@ import health.tracking.application.dto.DashboardWeekDTO;
 import health.tracking.application.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,9 +18,10 @@ public class DashboardController {
     @Autowired
     DashboardService dashboardService;
 
-    @GetMapping("/dashboard-daily/{username}/{selectedDate}")
-    public ResponseEntity<?> getDailyDashboard(@PathVariable String username, @PathVariable String selectedDate){
-         DashboardDailyDTO dto=dashboardService.getDailyData(username, selectedDate);
+    @GetMapping("/dashboard-daily/{selectedDate}")
+    public ResponseEntity<?> getDailyDashboard(@PathVariable String selectedDate, Authentication authentication){
+        String username=authentication.getName();
+        DashboardDailyDTO dto=dashboardService.getDailyData(username, selectedDate);
          if(dto!=null){
             return ResponseEntity.ok(dto);
          }
@@ -28,8 +30,9 @@ public class DashboardController {
          }
     }
 
-    @GetMapping("/dashboard-week/{username}/{selectedDate}")
-    public ResponseEntity<?> getWeekDashboard(@PathVariable String username, @PathVariable String selectedDate) {
+    @GetMapping("/dashboard-week/{selectedDate}")
+    public ResponseEntity<?> getWeekDashboard( @PathVariable String selectedDate, Authentication authentication) {
+        String username=authentication.getName();
         DashboardWeekDTO dto = dashboardService.getWeekData(username, selectedDate);
         if(dto!=null){
             return ResponseEntity.ok(dto);

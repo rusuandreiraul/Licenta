@@ -6,8 +6,10 @@ import health.tracking.application.service.GoalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -18,15 +20,20 @@ public class GoalController {
     GoalService goalService;
 
     @GetMapping("/goals/{username}")
-    public ResponseEntity<?> getGoals(@PathVariable String username){
-        List<GoalDTO> goals=goalService.findByUser(username);
-        if(goals!=null)
-        return ResponseEntity.ok(goals);
-        else return ResponseEntity.badRequest().body(null);
+    public ResponseEntity<?> getGoals(@PathVariable String username) {
+
+        List<GoalDTO> goals = goalService.findByUser(username);
+
+        if (goals != null) {
+            return ResponseEntity.ok(goals);
+        } else {
+            return ResponseEntity.ok(Collections.emptyList());
+        }
     }
 
-    @PostMapping("/set-goals/{username}")
-    public String addGoals(@RequestBody List<GoalDTO> dtos, @PathVariable String username){
+    @PostMapping("/set-goals")
+    public String addGoals(@RequestBody List<GoalDTO> dtos, Authentication authentication){
+        String username=authentication.getName();
         boolean response=goalService.saveGoals(dtos, username);
         if(response==true){
             return "Adaugare cu success!";

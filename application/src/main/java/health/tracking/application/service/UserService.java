@@ -48,24 +48,9 @@ public class UserService {
         return userMapper.toDto(savedUser);
     }
 
-    public UserResponseDTO login(Map<String, String> credentials) {
-        String username=credentials.get("username");
-        String password=credentials.get("password");
-        UserResponseDTO dto;
-        User u=userRepository.findByEmailOrUsername(username, username);
-        if(u!=null && passwordEncoder.matches(password, u.getPassword())){
-            dto=userMapper.toDto(u);
-        }
-        else{
-            return null;
-        }
-        return dto;
-    }
 
     public UserResponseDTO getUser(String username) {
         User u= userRepository.findByEmailOrUsername(username,username);
-
-
         return userMapper.toDto(u);
     }
 
@@ -104,5 +89,17 @@ public class UserService {
         else{
             return false;
         }
+    }
+
+    public UserResponseDTO updateUser(UserResponseDTO dto,String username) {
+        User u=userRepository.findByEmailOrUsername(username, username);
+        if(u!=null){
+            u.setHeight(dto.getHeight());
+            u.setWeight(dto.getWeight());
+            User savedUser=userRepository.save(u); //update pe user
+            return userMapper.toDto(u);
+        }
+        return null;
+
     }
 }

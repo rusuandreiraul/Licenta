@@ -2,9 +2,13 @@
 import { ref } from "vue";
 import { useAuth } from "~/composable/useAuth";
 
-const props = defineProps(["targetUsername"]);
+const { user, token } = useAuth();
 
-const { user } = useAuth();
+const props=defineProps({
+  targetUsername: String
+})
+
+
 
 const username = user.value;
 const goals = ref([]);
@@ -18,15 +22,20 @@ const state = ref({
   sleep: undefined,
   alimentation: undefined,
 });
+
 async function fetchGoals() {
   try {
-    if (!props.targetUsername) {
+    if (!token.value) {
       return;
     }
     const response = await fetch(
       `http://localhost:8080/goals/${props.targetUsername}`,
       {
         method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token.value}`,
+        }
       }
     );
 
@@ -57,10 +66,13 @@ async function setGoals() {
 
   try {
     const response = await fetch(
-      `http://localhost:8080/set-goals/${username}`,
+      `http://localhost:8080/set-goals`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token.value}`,
+        },
         body: JSON.stringify(sendGoals),
       }
     );
@@ -83,7 +95,7 @@ const getGoalTarget = (type) => {
 };
 
 watch(
-  () => props.targetUsername,
+  () => token.value,
   (newVal) => {
     if (newVal) fetchGoals();
   },

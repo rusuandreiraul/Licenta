@@ -9,6 +9,9 @@ import { useDateWeek } from "~/composable/useDateWeek";
 
 // User
 const { user } = useAuth();
+const {token}=useAuth();
+
+
 const username = user.value;
 
 const { getLastWeekDates } = useDateWeek();
@@ -106,10 +109,15 @@ const formatDate = (calendarDate) => {
 
 async function fetchUser() {
   try {
-    const response = await fetch(`http://localhost:8080/user/${username}`);
+    const response = await fetch(`http://localhost:8080/profile`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.value}`,
+      }
+    });
     if (response.ok) {
       userValue.value = await response.json();
-      console.log("user full", userValue);
     }
   } catch (e) {
     console.error(e);
@@ -119,11 +127,12 @@ async function fetchUser() {
 async function fetchChanges() {
   try {
     const response = await fetch(
-      `http://localhost:8080/user-change/${username}`,
+      `http://localhost:8080/user-change`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token.value}`,
         },
         body: JSON.stringify(userValue),
       }
@@ -138,8 +147,13 @@ async function fetchChanges() {
 
 async function fetchGoals() {
   try {
-    const response = await fetch(`http://localhost:8080/goals/${username}`, {
+
+    const response = await fetch(`http://localhost:8080/goals`, {
       method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.value}`,
+      }
     });
 
     if (response.ok) {
@@ -156,7 +170,7 @@ async function fetchGoals() {
   const selectedDate = formatDate(date.value);
   try {
     const response = await fetch(
-      `http://localhost:8080/dashboard-week/${username}/${selectedDate}`,
+      `http://localhost:8080/dashboard-week/${selectedDate}`,
       {
         method: "GET",
       }
@@ -178,15 +192,17 @@ async function fetchDailyData() {
   const selectedDate = formatDate(date.value);
   try {
     const response = await fetch(
-      `http://localhost:8080/dashboard-daily/${username}/${selectedDate}`,
+      `http://localhost:8080/dashboard-daily/${selectedDate}`,
       {
         method: "GET",
+        headers:{
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token.value}`,
+        }
       }
     );
     if (response.ok) {
       const data = await response.json();
-
-      console.log("data", data);
 
       activityData.value = data.activityDetails || [];
       sleepData.value = data.sleepDetails || null;
@@ -242,7 +258,6 @@ watch(date, (newDate) => {
 });
 
 onMounted(() => {
-  // La montare, rulează toate fetch-urile
   refreshFetch();
 });
 </script>
@@ -348,6 +363,7 @@ onMounted(() => {
               </UButton>
               <template #body>
                 <div class="flex flex-col p-3 gap-2">
+                  <form method="post" onSubmit="fetchChanges()">
                   <label>Password</label>
                   <UInput type="password" placeholder="*******" />
                   <label>Inaltime</label>
@@ -363,10 +379,10 @@ onMounted(() => {
                     v-model="userValue.weight"
                   />
                   <UButton
-                    onclick="fetchChanges()"
                     label="Confirma modificari"
                     class="mt-2 py-2"
                   />
+                  </form>
                 </div>
               </template>
             </UModal>

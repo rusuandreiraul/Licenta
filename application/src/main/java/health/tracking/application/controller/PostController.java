@@ -7,6 +7,7 @@ import health.tracking.application.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -30,8 +31,9 @@ public class PostController {
         }
     }
 
-    @GetMapping("/get-posts/{username}")
-    public ResponseEntity<?> getPosts(@PathVariable String username){
+    @GetMapping("/get-posts")
+    public ResponseEntity<?> getPosts(Authentication authentication){
+        String username=authentication.getName();
         List<PostResponseDTO> posts=postService.findAllPostsByDate(username,LocalDate.now());
         if(posts.isEmpty()){
             return ResponseEntity.ok(new ArrayList<PostResponseDTO>());
@@ -39,8 +41,9 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
-    @GetMapping("posts/{username}")
-    public ResponseEntity<?> getPostsUser(@PathVariable String username){
+    @GetMapping("/posts")
+    public ResponseEntity<?> getPostsUser(Authentication authentication){
+        String username=authentication.getName();
         List<PostResponseDTO> posts=postService.findAllPostsByUser(username);
         if(posts.isEmpty()){
             return ResponseEntity.ok(new ArrayList<>());
