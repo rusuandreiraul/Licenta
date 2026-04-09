@@ -10,6 +10,8 @@ import health.tracking.application.entities.UserStreak;
 import health.tracking.application.mapper.UserStreakMapper;
 import health.tracking.application.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -65,7 +67,32 @@ public class UserStreakService {
         }
         return null;
     }
- //aici verific daca ambii si-au facut obiectivele
+
+
+    @Scheduled(cron = "0 59 23 * * *")
+    public void finalizeStreak(){ //functie care se va apela mereu la ora 23:59
+        LocalDate today=LocalDate.now();
+
+        List<UserStreak> activeStreak=userStreakRepository.findAll();
+
+        for(UserStreak streak: activeStreak){
+            if(!streak.getLastStreakDate().equals(today)){
+                User u1=streak.getUserOne();
+                User u2=streak.getUserTwo();
+                if(bothCloseGoals(u1,u2, today)){
+                    streak.setStreakCount(streak.getStreakCount()+1);
+                    streak.setLastStreakDate(today);
+                    userStreakRepository.save(streak);
+                }
+                else{
+                    streak.setStreakCount(0);
+                    userStreakRepository.save(streak);
+                }
+            }
+        }
+
+    }
+
  private boolean bothCloseGoals(User u1, User u2, LocalDate date) {
 
      int ex1 = activityRepository.findDurationByUserAndActivityDate(u1, date);
@@ -94,6 +121,26 @@ public class UserStreakService {
         }
         return completed >= 3;
     }
+
+    public int getStreakBetweenUsers(String sender, String receiver) {
+        User u1 = userRepository.findByEmailOrUsername(sender, sender);
+        User u2 = userRepository.findByEmailOrUsername(receiver, receiver);
+        UserStreak us = userStreakRepository.findStreakBetweenUsers(u1, u2);
+
+        if (us != null) {
+            if (us.getLastStreakDate().isBefore(LocalDate.now().minusDays(1))) {
+                us.setStreakCount(0);
+                userStreakRepository.save(us);
+                return 0;
+            }
+            return us.getStreakCount();
+        }
+        return 0;
+    }
+
+
+
+
 }
 
 
