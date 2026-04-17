@@ -1,10 +1,54 @@
 <script setup>
+import {useAuth} from "~/composable/useAuth.js";
+
 const props = defineProps({
   username: String,
   content: String,
   urlImage: String,
   createDate: String,
 });
+
+const {token}=useAuth();
+
+const streak=ref();
+
+
+
+async function startChallenge(){
+  const response=await fetch(`http://localhost:8080/challenge/${props.username}`,{
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    }
+  });
+
+  if(response.ok){
+    const data = await response.json();
+    console.log("challenge: ", data);
+  }
+
+}
+
+
+async function fetchStreak(){
+  const response=await fetch(`http://localhost:8080/streak/${props.username}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    }
+  });
+  if(response.ok){
+    streak.value=await response.text();
+  }
+}
+
+onMounted(async () => {
+  fetchStreak();
+})
+
+
 </script>
 
 <template>
@@ -68,7 +112,9 @@ const props = defineProps({
       </ul>
     </div>
     <div class="flex flex-col items-center">
-      <div class="absolute left-2 top-2">strike</div>
+      <div class="absolute left-2 top-2">
+        🔥{{streak}}
+      </div>
       <img class="w-24 h-24 mb-6 rounded-full" alt="Bonnie image" />
       <h5 class="mb-0.5 text-xl font-semibold tracking-tight text-heading">
         {{ props.username }}
@@ -78,6 +124,7 @@ const props = defineProps({
       <div class="flex mt-4 md:mt-6 gap-4">
         <button
           type="button"
+          @click="startChallenge"
           class="inline-flex items-center text-black bg-brand box-border border border- hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
         >
           Challenge

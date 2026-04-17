@@ -11,6 +11,28 @@ const posts = ref([]);
 
 const postContent = ref("");
 
+const leaderboard=ref({})
+
+async function getLeaderboard(){
+  try {
+    const response = await fetch(`https://localhost:8080/leaderboard`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      }
+
+    });
+    if (response.ok) {
+      leaderboard.value = await response.json();
+
+    }
+  }
+  catch (error) {
+    console.log(error);
+  }
+}
+
 async function getUsers() {
   try {
     const response = await fetch(
@@ -41,12 +63,10 @@ async function sendPost() {
     const response = await fetch(`http://localhost:8080/add-post`, {
       method: "POST",
       headers: {
-        "Content-type": "application/json",
-        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token.value}`
         },
-      },
+
       body: JSON.stringify(postPayload),
     });
 
@@ -95,7 +115,7 @@ onMounted(() => {
         >
           <div class="flex flex-col items-center">
             <div
-              class="bg-gray-300 w-16 sm:w-20 h-20 sm:h-24 flex items-center justify-center font-bold text-white rounded-t-lg"
+              class="bg-gray-300 w-16 sm:w-20 h-20 sm:h-24 flex items-center justify-center font-bold text-white rounded-t-lg hover:-translate-y-2 hover:shadow-2xl hover:shadow-gray-500"
             >
               2
             </div>
@@ -104,7 +124,7 @@ onMounted(() => {
 
           <div class="flex flex-col items-center">
             <div
-              class="bg-yellow-400 w-16 sm:w-20 h-28 sm:h-32 flex items-center justify-center font-bold text-white rounded-t-lg shadow-md"
+              class="bg-yellow-400 w-16 sm:w-20 h-28 sm:h-32 flex items-center justify-center font-bold text-white rounded-t-lg shadow-md hover:-translate-y-2 hover:shadow-2xl  hover:shadow-amber-400"
             >
               1
             </div>
@@ -115,7 +135,7 @@ onMounted(() => {
 
           <div class="flex flex-col items-center">
             <div
-              class="bg-orange-400 w-16 sm:w-20 h-16 sm:h-20 flex items-center justify-center font-bold text-white rounded-t-lg"
+              class="bg-orange-400 w-16 sm:w-20 h-16 sm:h-20 flex items-center justify-center font-bold text-white rounded-t-lg hover:-translate-y-2 hover:shadow-2xl  hover:shadow-amber-700"
             >
               3
             </div>
@@ -123,7 +143,7 @@ onMounted(() => {
           </div>
         </div>
         <div
-          class="flex flex-col gap-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl w-full lg:max-w-xs shadow-sm"
+          class="flex flex-col gap-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl w-full lg:max-w-xs shadow-sm transition-all hover:-translate-y-2 hover:shadow-xl"
         >
           <div class="text-center font-semibold text-gray-700">
             🏆 Eu vs PopescuMaria

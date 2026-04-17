@@ -4,11 +4,10 @@ import { useAuth } from "~/composable/useAuth";
 const route = useRoute();
 const username = route.params.username;
 
-const { user } = useAuth();
+const { token } = useAuth();
 
 const isChatOpen = ref(false);
 
-const loggedUser = user.value;
 
 const isFollowed = ref(false);
 
@@ -17,7 +16,14 @@ const posts = ref([]);
 async function checkFollow() {
   try {
     const response = await fetch(
-      `http://localhost:8080/check-follow/${loggedUser}/${username}`
+      `http://localhost:8080/check-follow/${username}`,{
+        method: "GET",
+          headers:{
+          "Content-Type": "application/json",
+            "Authorization" : `Bearer ${token.value}`
+          }
+
+        }
     );
     if (response.ok) {
       isFollowed.value = await response.json();
@@ -30,7 +36,14 @@ async function checkFollow() {
 async function followUser() {
   try {
     const response = await fetch(
-      `http://localhost:8080/follow-user/${loggedUser}/${username}`
+      `http://localhost:8080/follow-user/${username}`,{
+        method: "PUT",
+          headers: {
+          "Content-Type": "application/json",
+            "Authorization": `Bearer ${token.value}`
+          }
+
+        }
     );
 
     if (response.ok) {
@@ -45,7 +58,14 @@ async function followUser() {
 
 async function getPosts() {
   try {
-    const response = await fetch(`http://localhost:8080/posts/${username}`);
+    const response = await fetch(`http://localhost:8080/posts`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token.value}`
+          }
+        }
+    );
 
     if (response.ok) {
       posts.value = await response.json();
@@ -93,7 +113,7 @@ onMounted(() => {
               <UButton label="Message" color="neutral" variant="outline" />
 
               <template #body>
-                <MessageChat :receiver="{username}" />
+                <MessageChat :receiver="username" />
               </template>
             </USlideover>
           </div>
