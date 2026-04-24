@@ -14,5 +14,4 @@ import java.time.LocalDate;
 public class GoalDTO {
     private String type;
     private int targetValue;
-
 }

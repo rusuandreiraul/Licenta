@@ -27,8 +27,7 @@ public class GoalLogService {
     @Autowired
     UserMapper userMapper;
 
-    public List<UserResponseDTO> getLeaders(String username) {
-        // 1. Definire perioadă
+    public List<UserResponseDTO> getLeaders() {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(30);
 
