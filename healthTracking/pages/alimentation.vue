@@ -198,62 +198,63 @@ const progressPercent = computed(() => {
           <i class="text-bold">Goal: {{ caloriesGoal }} kcal </i>
           <UProgress v-model="progressPercent" status />
         </div>
-        <div>
-          <h1 class="p-4 font-bold text-2xl text-center">Mesele tale</h1>
+        <div class="mt-8 mb-4 px-2">
+          <h2 class="text-2xl font-extrabold text-gray-800 tracking-tight">
+            Jurnal Alimentar <span class="text-primary-500 text-sm font-medium ml-2">— {{ df.format(modelValueDate.toDate(getLocalTimeZone())) }}</span>
+          </h2>
         </div>
-        <div
-          class="bg-green-200 p-4 flex justify-between items-center border border-green-400 rounded"
-        >
-          <div>
-            <h1 class="font-bold font-2xl p-3">Mic dejun</h1>
-            <img src="/micdejun.jpeg" class="h-20 rounded-2xl" />
-          </div>
-          <div class="flex flex-col">
-            <div v-if="isEmpty(breakfast)">Recomandat: 400-600 kcal</div>
-            <div v-else>
-              <div v-for="b in breakfast">{{ b }}</div>
+
+        <div class="grid grid-cols-1 gap-6 p-2">
+
+          <div v-for="meal in [
+    { title: 'Mic Dejun', data: breakfast, img: '/micdejun.jpeg', color: 'emerald', rec: '400-600' },
+    { title: 'Prânz', data: lunch, img: '/pranz.jpg', color: 'orange', rec: '600-800' },
+    { title: 'Cină', data: dinner, img: '/cina.jpeg', color: 'indigo', rec: '300-500' }
+  ]" :key="meal.title"
+               class="group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 flex h-40">
+
+            <div class="relative w-1/3 overflow-hidden">
+              <img :src="meal.img" class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div class="absolute inset-0 bg-gradient-to-r from-black/40 to-transparent flex items-end p-4">
+                <h3 class="text-white font-bold text-xl uppercase tracking-wider">{{ meal.title }}</h3>
+              </div>
             </div>
-          </div>
-          <div>
-            <AddModal type="alimentation" :user="user" :date="modelValueDate" />
-          </div>
-        </div>
-        <div
-          class="bg-red-200 p-4 flex justify-between items-center border border-red-400 rounded"
-        >
-          <div>
-            <h1 class="font-bold font-2xl p-3">Pranz</h1>
-            <img src="/pranz.jpg" class="h-20 rounded-2xl" />
-          </div>
-          <div class="flex flex-col">
-            <div v-if="isEmpty(lunch)">Recomandat: 600-800 kcal</div>
-            <div v-else>
-              <div v-for="l in lunch">{{ l }}</div>
+
+            <div class="flex-1 p-5 flex flex-col justify-between bg-gradient-to-br from-white to-gray-50">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span :class="`text-${meal.color}-500 text-xs font-bold uppercase tracking-widest`">Status</span>
+                  <div v-if="isEmpty(meal.data)" class="text-gray-400 italic text-sm mt-1">
+                    Nicio înregistrare încă
+                  </div>
+                  <div v-else class="flex flex-wrap gap-2 mt-2">
+            <span v-for="item in meal.data" :key="item"
+                  class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold border border-gray-200 shadow-sm">
+              {{ item }}
+            </span>
+                  </div>
+                </div>
+
+                <div class="text-right">
+                  <span class="text-[10px] text-gray-400 uppercase block leading-none">Recomandat</span>
+                  <span class="font-mono text-gray-600 font-bold text-sm">{{ meal.rec }} <small>kcal</small></span>
+                </div>
+              </div>
+
+              <div class="flex justify-end border-t border-gray-100 pt-3">
+                <AddModal
+                    type="alimentation"
+                    :user="user"
+                    :date="modelValueDate.toString()"
+                    class="transform transition-transform hover:scale-105"
+                />
+              </div>
             </div>
-          </div>
-          <div>
-            <AddModal type="alimentation" :user="user" :date="modelValueDate" />
-          </div>
-        </div>
-        <div
-          class="bg-blue-200 p-4 flex justify-between items-center border border-blue-400 rounded"
-        >
-          <div>
-            <h1 class="font-bold font-2xl p-3">Cina</h1>
-            <img src="/cina.jpeg" class="h-20 rounded-2xl" />
-          </div>
-          <div class="flex flex-col">
-            <div v-if="isEmpty(dinner)">Recomandat: 300-500 kcal</div>
-            <div v-else>
-              <div v-for="d in dinner">{{ d }}</div>
-            </div>
-          </div>
-          <div>
-            <AddModal type="alimentation" :user="user" :date="modelValueDate" />
+
+            <div :class="`absolute left-0 top-0 w-1 h-full bg-${meal.color}-500`"></div>
           </div>
         </div>
       </div>
-
       <div
         class="hidden md:flex flex-col w-[350px] bg-gray-200 p-4 rounded-lg sticky top-0 h-screen"
       >

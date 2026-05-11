@@ -41,7 +41,6 @@ async function fetchGoals() {
 
     if (response.ok) {
       goals.value = await response.json();
-      console.log("goals", goals);
     }
   } catch (e) {
     console.error(e);

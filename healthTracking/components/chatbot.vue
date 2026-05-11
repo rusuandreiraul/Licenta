@@ -40,13 +40,22 @@ async function fetchInformationFromAI() {
 </script>
 
 <template>
-  <div>
-    <UChatMessages :messages="messages" should-auto-scroll />
-    <input
-      class="border bg-amber-50 w-full relative pb-2"
-      type="text"
-      v-model="userMessage"
-      @keyup.enter="sendMessage"
-    />
+
+  <div class="flex flex-col h-full relative">
+
+    <div class="flex-1 overflow-y-auto p-2">
+      <UChatMessages :messages="messages" should-auto-scroll />
+    </div>
+
+
+    <div class="p-2 border-t bg-white">
+      <input
+          class="border rounded-2xl bg-gray-50 w-full p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          type="text"
+          placeholder="Intreaba-ma ceva...."
+          v-model="userMessage"
+          @keyup.enter="sendMessage"
+      />
+    </div>
   </div>
 </template>

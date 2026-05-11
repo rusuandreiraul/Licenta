@@ -58,7 +58,7 @@ async function followUser() {
 
 async function getPosts() {
   try {
-    const response = await fetch(`http://localhost:8080/posts`, {
+    const response = await fetch(`http://localhost:8080/posts/${username}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -69,6 +69,7 @@ async function getPosts() {
 
     if (response.ok) {
       posts.value = await response.json();
+      console.log(posts.value);
     }
   } catch (e) {
     console.error(e);

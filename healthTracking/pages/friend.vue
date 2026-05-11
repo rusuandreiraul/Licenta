@@ -5,7 +5,7 @@ import { useAuth } from "~/composable/useAuth";
 const friendName = ref("");
 const friendList = ref([]);
 
-const { user, token } = useAuth();
+const {user, token } = useAuth();
 
 const posts = ref([]);
 
@@ -15,7 +15,8 @@ const leaderboard=ref({})
 
 async function getLeaderboard(){
   try {
-    const response = await fetch(`https://localhost:8080/leaderboard`, {
+
+    const response = await fetch(`http://localhost:8080/leaderboard`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -24,8 +25,9 @@ async function getLeaderboard(){
 
     });
     if (response.ok) {
-      leaderboard.value = await response.json();
-
+      const data = await response.json();
+      leaderboard.value = data;
+      console.log("leaderdboard", leaderboard.value);
     }
   }
   catch (error) {
@@ -100,6 +102,7 @@ async function getPosts() {
 
 onMounted(() => {
   getPosts();
+  getLeaderboard();
 });
 </script>
 

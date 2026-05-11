@@ -111,7 +111,6 @@ async function fetchActivitiesByDate() {
     if (response.ok) {
       activityData.value = await response.json();
     console.log(activityData);
-      // Calculăm sumarul total
       let totalCalories = 0;
       let totalDuration = 0;
 
@@ -299,7 +298,7 @@ onMounted(async () => {
         class="hidden lg:flex flex-col w-[350px] bg-white p-4 rounded-xl shadow-md sticky self-start top-4 h-[calc(100vh-32px)]"
       >
         <h2 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">
-          🤖 Asistentul tău Personal
+           Asistentul tău Personal
         </h2>
         <div class="h-full bg-gray-50 rounded-lg flex-1 overflow-y-auto">
           <Chatbot />

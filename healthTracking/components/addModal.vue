@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import {useAuth} from "~/composable/useAuth.js";
+import Chatbot from "~/components/chatbot.vue";
 
 const props = defineProps({
   type: { type: String, required: true },
@@ -275,6 +276,15 @@ async function handleSubmit() {
           Adaugă
         </button>
       </form>
+      <div v-else-if="props.type === 'AI'" class="flex flex-col w-full bg-white h-[600px]">
+        <h2 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">
+          Asistentul tău Personal
+        </h2>
+
+        <div class="flex-1 bg-gray-50 rounded-lg overflow-hidden relative">
+          <Chatbot />
+        </div>
+      </div>
     </template>
   </UModal>
 </template>

@@ -6,11 +6,10 @@ import { today, getLocalTimeZone } from "@internationalized/date";
 import DashboardCard from "~/components/dashboardCard.vue";
 import GoalsCard from "~/components/goalsCard.vue";
 import { useDateWeek } from "~/composable/useDateWeek";
+import {useGoals} from "~/composable/useGoals.js";
 
 // User
-const { user } = useAuth();
-const {token}=useAuth();
-
+const { user,token } = useAuth();
 
 const username = user.value;
 
@@ -22,7 +21,10 @@ const date = ref(today(getLocalTimeZone()));
 
 const week = ref(getLastWeekDates(date.value));
 
-const goals = ref({});
+const {dataGoals, getGoals} = useGoals();
+
+
+
 
 const activityData = ref({});
 const sleepData = ref({});
@@ -77,7 +79,7 @@ const chartOptionsBar = ref({
   },
 });
 
-// Radial chart options
+
 const chartOptionsRadial = ref({
   chart: { height: 300, width: 200, type: "radialBar" },
   colors: chartColors,
@@ -145,34 +147,19 @@ async function fetchChanges() {
   }
 }
 
-async function fetchGoals() {
-  try {
 
-    const response = await fetch(`http://localhost:8080/goals`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token.value}`,
-      }
-    });
 
-    if (response.ok) {
-      goals.value = await response.json();
-      console.log("Goals fetched in Dashboard:", goals.value);
-    }
-  } catch (e) {
-    console.error("Error fetching goals in dashboard:", e);
-    goals.value = [];
-  }
-}
-
-/*async function fetchWeekData() {
+async function fetchWeekData() {
   const selectedDate = formatDate(date.value);
   try {
     const response = await fetch(
       `http://localhost:8080/dashboard-week/${selectedDate}`,
       {
         method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token.value}`,
+        }
       }
     );
 
@@ -186,7 +173,7 @@ async function fetchGoals() {
   } catch (e) {
     console.error(e);
   }
-}*/
+}
 
 async function fetchDailyData() {
   const selectedDate = formatDate(date.value);
@@ -203,10 +190,9 @@ async function fetchDailyData() {
     );
     if (response.ok) {
       const data = await response.json();
-
+      console.log("data per zi", data);
       activityData.value = data.activityDetails || [];
       sleepData.value = data.sleepDetails || null;
-
       alimentationData.value = {
         names: data.alimentationName || [],
         stats: {
@@ -219,16 +205,18 @@ async function fetchDailyData() {
 
       const activitySerial = Math.min(
         100,
-        (data.totalActivityDuration / goals.value[0].targetValue) * 100
+        (data.totalActivityDuration / dataGoals.value[0].targetValue) * 100
       );
+
+      console.log(activitySerial);
       const sleepSerial = Math.min(
         100,
-        (data.totalHoursSleep / goals.value[1].targetValue) * 100
+        (data.totalHoursSleep / dataGoals.value[1].targetValue) * 100
       );
 
       const alimetationSerial = Math.min(
         100,
-        (data.totalCaloriesConsumed / goals.value[2].targetValue) * 100
+        (data.totalCaloriesConsumed / dataGoals.value[2].targetValue) * 100
       );
 
       seriesRadial.value = [
@@ -245,19 +233,19 @@ async function fetchDailyData() {
 async function refreshFetch() {
   // Așteaptă user, apoi goals, apoi datele zilnice
   await fetchUser();
-  await fetchGoals();
-  await fetchDailyData(); // Aici se va apela automat calculateRadialSeries()
-  //await fetchWeekData();
+  await fetchDailyData();
+  await fetchWeekData();
 }
 
 watch(date, (newDate) => {
   week.value = getLastWeekDates(newDate);
   chartOptionsBar.value.xaxis.categories = week.value;
   fetchDailyData();
-  //fetchWeekData();
+  fetchWeekData();
 });
 
-onMounted(() => {
+onMounted(async() => {
+  await getGoals();
   refreshFetch();
 });
 </script>
@@ -275,7 +263,7 @@ onMounted(() => {
             <h1 class="text-bold text-2xl">Salut, {{ username }} 👋</h1>
           </div>
           <div class="grid grid-cols-2 p-6 gap-2">
-            <div class="bg-white rounded-2xl text-center">
+            <div class="bg-white rounded-2xl text-center transition-all hover:-translate-y-2 hover:shadow-xl">
               <client-only>
                 <apexchart
                   type="radialBar"
@@ -286,7 +274,7 @@ onMounted(() => {
               </client-only>
               All progress in one chart
             </div>
-            <div class="bg-white rounded-2xl">
+            <div class="bg-white rounded-2xl transition-all hover:-translate-y-2 hover:shadow-xl">
               <client-only>
                 <apexchart
                   type="bar"
@@ -299,7 +287,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="grid grid-cols-3 p-2 gap-2">
+          <div class="grid grid-cols-3 p-2 gap-2 ">
             <DashboardCard
               title="Activity"
               :icon="icons.activity"

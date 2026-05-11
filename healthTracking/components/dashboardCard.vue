@@ -20,7 +20,7 @@ const props = defineProps({
 });
 </script>
 <template>
-  <UCard class="shadow-lg rounded-2xl border-none">
+  <UCard class="shadow-lg rounded-2xl border-none transition-all hover:-translate-y-2 hover:shadow-xl">
     <template #header>
       <div class="flex items-center gap-2 font-bold text-xl">
         <span v-html="props.icon"></span>
