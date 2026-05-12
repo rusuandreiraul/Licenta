@@ -36,11 +36,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Dezactivăm pentru că folosim JWT
+                .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) //permite lui vue sa comunica cu backend
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/register","/gs-guide-websocket/**").permitAll() // Permitem accesul la auth
                         .requestMatchers( "/chat-history/**").permitAll()
+                        .requestMatchers("/leaderboard").permitAll()
+                        .requestMatchers("/user-change").permitAll()
                         .anyRequest().authenticated() // Tot restul e blocat fără token
 
                 )

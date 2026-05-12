@@ -32,8 +32,8 @@ public class UserController {
     @Autowired
     private JwtService jwtService;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRequestDTO dto) {
+    @PostMapping(value = "/register", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE) //spune ca contine si fisiere nu doar text
+    public ResponseEntity<?> registerUser(@ModelAttribute UserRequestDTO dto) { //modelAttribute folosi pentru multipart profile data
         UserResponseDTO response = userService.register(dto);
         if (response != null)
             return ResponseEntity.ok(response);
@@ -54,9 +54,7 @@ public class UserController {
         }
     }
 
-    //public ResponseEntity<?> changeUser(@RequestBody UserRequestDTO dto){
 
-    //}
 
     @PostMapping("/login")
     public LoginResponseDTO loginUser(@RequestBody Map<String, String> credentials){
@@ -83,10 +81,9 @@ public class UserController {
         }
     }
 
-    @PostMapping("/user-change")
-    public ResponseEntity<?>changeUser(@RequestBody UserResponseDTO dto, Authentication authentication){
+    @PostMapping(value = "/user-change", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?>changeUser(@ModelAttribute UserRequestDTO dto, Authentication authentication){
         String username=authentication.getName();
-
         UserResponseDTO updatedDto = userService.updateUser(dto, username);
 
         if (updatedDto != null) {

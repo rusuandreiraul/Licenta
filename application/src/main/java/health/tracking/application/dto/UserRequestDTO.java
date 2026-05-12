@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.BatchSize;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ public class UserRequestDTO {
     private String password;
     private double height;
     private double weight;
+    private MultipartFile profileImage;
     private LocalDate birthDate;
 
 

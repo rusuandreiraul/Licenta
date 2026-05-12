@@ -23,6 +23,8 @@ public class UserService {
     UserRepository userRepository;
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    private CloudinaryService cloudinaryService;
 
     private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -40,6 +42,13 @@ public class UserService {
         if (user.getBirthDate() == null || !user.getBirthDate().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("Data nașterii trebuie să fie în trecut.");
         }
+
+        if(dto.getProfileImage()!=null && !dto.getProfileImage().isEmpty()){
+            String imageUrl= cloudinaryService.uploadImage(dto.getProfileImage());
+
+            user.setUrlProfileImage(imageUrl);
+        }
+
 
         String encodedPassword=passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
@@ -91,11 +100,16 @@ public class UserService {
         }
     }
 
-    public UserResponseDTO updateUser(UserResponseDTO dto,String username) {
+    public UserResponseDTO updateUser(UserRequestDTO dto,String username) {
         User u=userRepository.findByEmailOrUsername(username, username);
         if(u!=null){
             u.setHeight(dto.getHeight());
             u.setWeight(dto.getWeight());
+            if(dto.getProfileImage()!=null && !dto.getProfileImage().isEmpty()){
+                String imageUrl= cloudinaryService.uploadImage(dto.getProfileImage());
+
+                u.setUrlProfileImage(imageUrl);
+            }
             User savedUser=userRepository.save(u); //update pe user
             return userMapper.toDto(u);
         }

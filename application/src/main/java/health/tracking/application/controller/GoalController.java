@@ -20,15 +20,21 @@ public class GoalController {
     GoalService goalService;
 
     @GetMapping("/goals/{username}")
-    public ResponseEntity<?> getGoals(@PathVariable String username) {
-
-        List<GoalDTO> goals = goalService.findByUser(username);
-
-        if (goals != null) {
-            return ResponseEntity.ok(goals);
-        } else {
-            return ResponseEntity.ok(Collections.emptyList());
+    public ResponseEntity<?> getGoals(Authentication authentication, @PathVariable String username) {
+        String userLogged=authentication.getName();
+        List<GoalDTO> goals;
+        if(userLogged.equals(username)) {
+            goals = goalService.findByUser(userLogged);
         }
+        else{
+            goals=goalService.findByUser(username);
+        }
+        if (goals != null) {
+                return ResponseEntity.ok(goals);
+        } else {
+                return ResponseEntity.ok(Collections.emptyList());
+        }
+
     }
 
     @PostMapping("/set-goals")

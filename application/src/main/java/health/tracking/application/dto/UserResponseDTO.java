@@ -17,6 +17,7 @@ public class UserResponseDTO {
     private String username;
     private double height;
     private double weight;
+    private String urlProfileImage;
     private LocalDate birthDate;
 
 
