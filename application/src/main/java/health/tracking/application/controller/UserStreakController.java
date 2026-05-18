@@ -24,7 +24,7 @@ public class UserStreakController {
     private UserStreakService userStreakService;
 
 
-    @PostMapping("/challenge")
+    @PostMapping("/challenge") //refa asta cu challenge
     public ResponseEntity<?> challangeUser(@RequestBody UserStreakRequestDTO dto,Authentication authentication){
         String sender=authentication.getName();
         dto.setSender(sender);
@@ -40,6 +40,14 @@ public class UserStreakController {
     public int getStreak(@PathVariable String receiver, Authentication authentication){
         String sender=authentication.getName();
         return userStreakService.getStreakBetweenUsers(sender, receiver);
+    }
+
+    @GetMapping("/best-streak")
+    public ResponseEntity<UserStreakResponseDTO> getBestStreak(Authentication authentication){
+        String username=authentication.getName();
+        UserStreakResponseDTO dto=userStreakService.getBestStreak(username);
+        System.out.println("DEBUG: dto de best streak este " + dto);
+        return ResponseEntity.ok(userStreakService.getBestStreak(username));
     }
 
 

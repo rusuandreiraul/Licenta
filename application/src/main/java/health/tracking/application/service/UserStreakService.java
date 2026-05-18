@@ -130,7 +130,14 @@ public class UserStreakService {
     }
 
 
-
+    public UserStreakResponseDTO getBestStreak(String username) {
+        User u=userRepository.findByEmailOrUsername(username,username);
+        if(u!=null){
+            UserStreak s=userStreakRepository.findFirstByUserOneOrUserTwoOrderByStreakCountDesc(u, u);
+            return userStreakMapper.toDto(s);
+        }
+        return null;
+    }
 }
 
 
