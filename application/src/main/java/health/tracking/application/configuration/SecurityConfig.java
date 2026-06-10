@@ -33,23 +33,27 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
+    /*.requestMatchers( "/chat-history/**").permitAll()
+                        .requestMatchers("/leaderboard").permitAll()
+                        .requestMatchers("/user-change").permitAll() */
+    //"/gs-guide-websocket/**" astea vor trebuie adaugate dupa sa vedem daca functioneaza aplicatia
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) //permite lui vue sa comunica cu backend
+                .csrf(csrf -> csrf.disable()) //dezactivare CSRF pentru utilizarea filtrului
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) //permite frontend-ului comunicare cu backend
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/register","/gs-guide-websocket/**").permitAll() // Permitem accesul la auth
-                        .requestMatchers( "/chat-history/**").permitAll()
-                        .requestMatchers("/leaderboard").permitAll()
-                        .requestMatchers("/user-change").permitAll()
-                        .anyRequest().authenticated() // Tot restul e blocat fără token
+                        .requestMatchers("/login").permitAll() //se permite accesul fara token pentru register si login
+                        .requestMatchers("/register").permitAll()
+                        .requestMatchers("/error").permitAll() //pentru validarea erorilor
+                        .anyRequest().authenticated() //accesul pentru restul endpointurilor este blocat fara token
 
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Nu folosim JSESSIONID
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Nu se folosesc JSESSIONID
                 )
-                // Adăugăm filtrul tău înaintea filtrului de autentificare standard
+                // filtrul personalizat inaintea filtrului de autentificare standard
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -59,11 +63,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permite URL-ul frontend-ului tău
+        // Permite doar URL-ul frontend-ului
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://127.0.0.1:3000"));
         // Permite metodele HTTP necesare
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // IMPORTANTE: Permite header-ul Authorization
+        //  Permite header-ul Authorization pentru a putea transmite tokenul catre backend
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         configuration.setAllowCredentials(true);
 

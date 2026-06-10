@@ -33,4 +33,17 @@ public class Alimentation {
     public String getNameProduct() {
         return this.nameProduct;
     }
+
+
+    @Override
+    public String toString() {
+        return "Alimentation{" +
+                "proteins=" + proteins +
+                ", nameProduct='" + nameProduct + '\'' +
+                ", mealDate=" + mealDate +
+                ", fat='" + fat + '\'' +
+                ", carbohydrates='" + carbohydrates + '\'' +
+                ", calories=" + calories +
+                '}';
+    }
 }

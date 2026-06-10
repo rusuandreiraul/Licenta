@@ -3,6 +3,7 @@ package health.tracking.application.controller;
 import health.tracking.application.dto.ActivityChartSeriesDTO;
 import health.tracking.application.dto.ActivityDTO;
 import health.tracking.application.service.ActivityService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,7 +29,7 @@ public class ActivityController {
     }
 
     @PostMapping("/dashboard-activity/{date}")
-    public ResponseEntity<?> addNewActivity(@RequestBody ActivityDTO activityDTO, @PathVariable String date, Authentication authentication){
+    public ResponseEntity<?> addNewActivity(@Valid @RequestBody ActivityDTO activityDTO, @PathVariable String date, Authentication authentication){
         String username=authentication.getName(); //luam numele din token
 
         String response= activityService.addActivity(activityDTO, username, date);
@@ -39,6 +40,14 @@ public class ActivityController {
     public List<ActivityChartSeriesDTO> getSeriesChart(@PathVariable String date, Authentication authentication){
         String username=authentication.getName();
         return activityService.getSeriesByDate(username, date);
+    }
+
+    @DeleteMapping("activity/delete-activity/{selectedId}")
+    public ResponseEntity<?>deleteActivity(@PathVariable Long selectedId, Authentication authentication){
+        String username=authentication.getName();
+        String response=activityService.deleteActivity(selectedId, username);
+
+        return ResponseEntity.ok(response);
     }
 
 }

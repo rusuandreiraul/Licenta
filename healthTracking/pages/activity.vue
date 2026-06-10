@@ -13,6 +13,15 @@ import {
 import Table from "~/components/table.vue";
 import Chatbot from "~/components/chatbot.vue";
 
+
+useSeoMeta({
+  title: 'Activitati fizice - WellSync',
+  description: 'Vizualizează progresul zilnic pentru activitate fizică',
+  ogTitle: 'Activitatii fizice - WellSync',
+  ogDescription: 'Monitorizare inteligentă a stilului de viață.',
+});
+
+
 // --- STATE-URI (Datele) ---
 const series = ref([
   {
@@ -29,6 +38,7 @@ const {dataGoals,getGoals} =useGoals();
 
 const activityData = ref([]);
 const activityHeaders = ["Activitate", "Durată (min)", "Dată", "Calorii (kcal)"];
+const activityKeys=["activityType","duration", "activityDate", "calories"];
 
 const activityDataAll = ref({
   calories: 0,
@@ -110,6 +120,7 @@ async function fetchActivitiesByDate() {
     );
     if (response.ok) {
       activityData.value = await response.json();
+      console.log("ACTIVITATI", activityData.value);
     console.log(activityData);
       let totalCalories = 0;
       let totalDuration = 0;
@@ -202,6 +213,11 @@ watch([modelValueDate, user], () => {
 
 const goals=ref(null);
 
+async function handleDelete() {
+  await fetchActivitiesByDate();
+  await fetchActivitySeries();
+}
+
 onMounted(async () => {
   await getGoals();
   goals.value=dataGoals.value;
@@ -290,24 +306,22 @@ onMounted(async () => {
           </client-only>
         </div>
         <div>
-          <Table  :headers="activityHeaders" :content="activityData"/>
+          <Table @deleted="handleDelete" :headers="activityHeaders" :content="activityData" :keys="activityKeys"/>
         </div>
       </div>
 
-      <div
-        class="hidden lg:flex flex-col w-[350px] bg-white p-4 rounded-xl shadow-md sticky self-start top-4 h-[calc(100vh-32px)]"
-      >
-        <h2 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">
-           Asistentul tău Personal
-        </h2>
-        <div class="h-full bg-gray-50 rounded-lg flex-1 overflow-y-auto">
-          <Chatbot />
-        </div>
-      </div>
+  <div
+      class="hidden md:flex flex-col w-[350px] bg-gray-200 p-4 rounded-lg sticky top-0 h-screen"
+  >
+    <h2 class="text-gray-700 font-bold mb-2">Asistent AI</h2>
+    <div class="h-full bg-white rounded-lg">
+      <Chatbot />
+    </div>
+  </div>
 
-      <div class="fixed bottom-4 right-4 lg:hidden z-50">
-        <AddModal type="AI" :user="user" :date="modelValueDate" />
-      </div>
+    <div class="fixed bottom-4 right-4 md:hidden">
+      <AddModal type="AI" :user="user" :date="modelValueDate" />
+    </div>
     </main>
   </div>
 </template>

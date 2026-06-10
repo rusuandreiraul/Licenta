@@ -1,5 +1,9 @@
 package health.tracking.application.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,13 +19,20 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserRequestDTO {
+    @Email
     private String email;
     private String username;
+    @Size(min = 8, message = "Parola trebuie să aibă o lungime minimă de 8 caractere")
     private String password;
+    @Positive(message = "Inalțimea trebuie să fie pozitivă")
     private double height;
+    @Positive
     private double weight;
     private MultipartFile profileImage;
+    @PastOrPresent(message = "Data nașterii nu poate fi în viitor")
     private LocalDate birthDate;
-
-
 }
+
+
+
+

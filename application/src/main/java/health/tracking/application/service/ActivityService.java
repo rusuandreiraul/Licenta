@@ -103,4 +103,17 @@ public class ActivityService {
         }
         return new ArrayList<>();
     }
+
+    public String deleteActivity(Long selectedId, String username) {
+
+       activityRepository.deleteById(selectedId);
+
+       if(activityRepository.findById(selectedId).isEmpty()){
+           return "Activitate stearsa cu succes";
+       }
+       else{
+           throw new RuntimeException("Eroare la stergerea activitatii fizice");
+       }
+
+    }
 }

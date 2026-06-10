@@ -4,6 +4,16 @@ import { useAuth } from "~/composable/useAuth";
 
 const { login } = useAuth();
 
+
+useSeoMeta({
+  title: 'Login - WellSync',
+  description: 'Pagina de autentificare',
+  ogTitle: 'Login - WellSync',
+  ogDescription: 'Pagina de autentificare.',
+});
+
+const remember=ref(false);
+
 const router = useRouter();
 const state = reactive({
   username: undefined,
@@ -21,7 +31,7 @@ async function loginUser() {
   });
   if (response.ok) {
     const data = await response.json();
-    login(data.username, data.token);
+    login(data.username, data.token, remember.value);
     router.push("/dashboard");
   } else {
     console.log("eroare", "eroare");
@@ -37,9 +47,9 @@ async function loginUser() {
     >
       <div class="relative">
         <img
-          src="/loginImage.jpg"
+          src="/wellSync.png"
           alt="Healthy food"
-          class="object-cover w-full h-full"
+          class="object-contain w-full h-full"
         />
         <div
           class="absolute inset-0 bg-gradient-to-t from-green-400/60 via-green-300/40 to-transparent"
@@ -89,11 +99,11 @@ async function loginUser() {
 
           <div class="flex items-center justify-between text-sm">
             <label class="flex items-center space-x-2">
-              <input type="checkbox" class="w-4 h-4 accent-green-500" />
-              <span class="text-gray-600">Remember me</span>
+              <input type="checkbox" v-model="remember" class="w-4 h-4 accent-green-500" />
+              <span class="text-gray-600">Ține-ma minte</span>
             </label>
             <a href="#" class="text-green-500 hover:underline"
-              >Forgot password?</a
+              >Ai uitat parola?</a
             >
           </div>
 

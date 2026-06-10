@@ -2,16 +2,43 @@
 import { ref, onMounted } from "vue";
 import friendCard from "~/components/friendCard.vue";
 import { useAuth } from "~/composable/useAuth";
+import {useSocial} from "~/composable/useSocials.js";
 const friendName = ref("");
 const friendList = ref([]);
 
 const {user, token } = useAuth();
+
+const {triggerChallengeUpdate}=useSocial();
 
 const posts = ref([]);
 
 const postContent = ref("");
 
 const leaderboard=ref({})
+
+const usernameBestStreak=ref("");
+
+
+async function getBestStreak(){
+  try{
+    const response=await fetch(`http://localhost:8080/best-streak`,{
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.value}`,
+      }
+    });
+
+    if(response.ok){
+      const data = await response.json();
+      console.log("best streak", data);
+      usernameBestStreak.value=data.receiver;
+    }
+  }
+  catch(e){
+    console.error(e);
+  }
+}
 
 async function getLeaderboard(){
   try {
@@ -20,7 +47,7 @@ async function getLeaderboard(){
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+        "Authorization": `Bearer ${token.value}`,
       }
 
     });
@@ -103,6 +130,7 @@ async function getPosts() {
 onMounted(() => {
   getPosts();
   getLeaderboard();
+  getBestStreak();
 });
 </script>
 
@@ -117,6 +145,9 @@ onMounted(() => {
           class="flex gap-2 sm:gap-4 items-end justify-center p-2 w-full lg:w-auto"
         >
           <div class="flex flex-col items-center">
+
+            <img class="w-8 h-8 p-1 mb-1 rounded-full ring-2 ring-default" :src="leaderboard[1]?.urlProfileImage"  alt="Bordered avatar">
+                {{leaderboard[1]?.username }}
             <div
               class="bg-gray-300 w-16 sm:w-20 h-20 sm:h-24 flex items-center justify-center font-bold text-white rounded-t-lg hover:-translate-y-2 hover:shadow-2xl hover:shadow-gray-500"
             >
@@ -126,6 +157,9 @@ onMounted(() => {
           </div>
 
           <div class="flex flex-col items-center">
+
+            <img class="w-8 h-8 p-1 mb-1 rounded-full ring-2 ring-default" :src="leaderboard[0]?.urlProfileImage"  alt="Bordered avatar">
+              {{leaderboard[0]?.username}}
             <div
               class="bg-yellow-400 w-16 sm:w-20 h-28 sm:h-32 flex items-center justify-center font-bold text-white rounded-t-lg shadow-md hover:-translate-y-2 hover:shadow-2xl  hover:shadow-amber-400"
             >
@@ -137,6 +171,10 @@ onMounted(() => {
           </div>
 
           <div class="flex flex-col items-center">
+
+            <img class="w-8 h-8 p-1 mb-1 rounded-full ring-2 ring-default" :src="leaderboard[2]?.urlProfileImage"  alt="Bordered avatar">
+              {{leaderboard[2]?.username}}
+
             <div
               class="bg-orange-400 w-16 sm:w-20 h-16 sm:h-20 flex items-center justify-center font-bold text-white rounded-t-lg hover:-translate-y-2 hover:shadow-2xl  hover:shadow-amber-700"
             >
@@ -149,11 +187,17 @@ onMounted(() => {
           class="flex flex-col gap-4 p-4 bg-gray-50 border border-gray-200 rounded-2xl w-full lg:max-w-xs shadow-sm transition-all hover:-translate-y-2 hover:shadow-xl"
         >
           <div class="text-center font-semibold text-gray-700">
-            🏆 Eu vs PopescuMaria
+            🏆 Eu vs {{usernameBestStreak}}
           </div>
           <div class="flex justify-center gap-3">
-            <UButton variant="outline" class="flex-1">Share</UButton>
-            <UButton class="flex-1">Message</UButton>
+            <UButton variant="outline" class="flex-1" @click="triggerChallengeUpdate(usernameBestStreak)">Challenge</UButton>
+            <USlideover title="Chat">
+              <UButton label="Message" class="flex-1" color="success" />
+
+              <template #body>
+                <MessageChat :receiver="usernameBestStreak" />
+              </template>
+            </USlideover>
           </div>
         </div>
         <div class="flex flex-col gap-2 w-full lg:w-64 lg:order-3">
@@ -198,6 +242,7 @@ onMounted(() => {
                     v-model="postContent"
                     placeholder="Ce ai reușit astăzi?"
                   />
+                  <!--share obiectiv etc-->
                   <UButton class="mt-4 w-full" @click="sendPost"
                     >Postează</UButton
                   >

@@ -105,4 +105,15 @@ public class SleepService {
         }
         return null;
     }
+
+    public String deleteSleep(Long selectedId) {
+
+        sleepRepository.deleteById(selectedId);
+        if(sleepRepository.findById(selectedId).isEmpty()){
+            return "Datele au fost eliminate cu succes";
+        }
+        else{
+            return "Eroare la stergerea datelor de somn";
+        }
+    }
 }

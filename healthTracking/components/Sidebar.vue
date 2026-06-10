@@ -54,13 +54,13 @@ const isActive = (path) => route.path === path;
     >
       <a href="/dashboard#summary" class="flex items-center ps-2.5 mb-5">
         <img
-          src="https://flowbite.com/docs/images/logo.svg"
+          src="/wellSync.png"
           class="h-6 me-3 sm:h-7"
           alt="Flowbite Logo"
         />
         <span
           class="self-center text-xl font-semibold whitespace-nowrap dark:text-white"
-          >HealthCare</span
+          >WellSync</span
         >
       </a>
       <ul class="space-y-2 font-medium">
@@ -217,36 +217,34 @@ const isActive = (path) => route.path === path;
             <span class="flex-1 ms-3 whitespace-nowrap">Friend</span>
           </a>
         </li>
-        <li class="absolute bottom-2">
+        <!-- My Account -->
+        <li class="absolute bottom-16 w-full pr-6"> <!-- Am ajustat poziția și lățimea -->
           <ULink
-            :to="`/${user.user.value}`"
-            :class="[
-              'flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group',
-              isActive('/myAccount')
-                ? 'bg-green-500 text-white dark:bg-green-600'
-                : '',
-            ]"
+              :to="`/${user.user.value}`"
+              :class="[
+      'flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group',
+      isActive('/myAccount') ? 'bg-green-500 text-white' : '',
+    ]"
           >
-            <svg
-              class="w-6 h-6 text-gray-800 dark:text-white"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0a8.949 8.949 0 0 0 4.951-1.488A3.987 3.987 0 0 0 13 16h-2a3.987 3.987 0 0 0-3.951 3.512A8.948 8.948 0 0 0 12 21Zm3-11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-              />
+            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0a8.949 8.949 0 0 0 4.951-1.488A3.987 3.987 0 0 0 13 16h-2a3.987 3.987 0 0 0-3.951 3.512A8.948 8.948 0 0 0 12 21Zm3-11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
             </svg>
 
-            <span class="flex-1 ms-3 whitespace-nowrap"> My account </span>
+            <span class="flex-1 ms-3 whitespace-nowrap">My account</span>
           </ULink>
+        </li>
+
+
+        <li class="absolute bottom-4 w-full pr-6">
+          <button
+              @click="user.logout()"
+              class="w-full flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-red-100 hover:text-red-600 dark:hover:bg-gray-700 group transition-colors"
+          >
+            <svg class="w-6 h-6 text-red-800 dark:text-red group-hover:text-red-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"/>
+            </svg>
+            <span class="flex-1 ms-3 text-left text-red-800 whitespace-nowrap">Logout</span>
+          </button>
         </li>
       </ul>
     </div>

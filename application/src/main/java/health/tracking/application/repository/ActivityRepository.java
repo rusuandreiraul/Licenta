@@ -52,5 +52,11 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
 
     int findDurationByUserAndActivityDate(User u2, LocalDate date);
+
+
+
+    List<Activity> findAllByUserAndActivityDateAfter(User user, LocalDate threeDaysAgo);
+
+
 }
 

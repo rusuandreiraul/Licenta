@@ -36,4 +36,16 @@ public class Sleep {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+
+    @Override
+    public String toString() {
+        return "Sleep{" +
+                "stress=" + stress +
+                ", quality=" + quality +
+                ", morningEnergy=" + morningEnergy +
+                ", hoursSlept=" + hoursSlept +
+                ", dateSleep=" + dateSleep +
+                '}';
+    }
 }

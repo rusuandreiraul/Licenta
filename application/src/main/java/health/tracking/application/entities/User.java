@@ -18,7 +18,7 @@ import java.util.*;
 @ToString(exclude = {"following", "followers", "activities", "sleepList", "alimentationList", "goalList"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "\"users\"")
-public class User implements UserDetails { //acest userDetails ii "traduce" lui spring datele din baza mea de date
+public class User implements UserDetails { //acest userDetails ii "traduce" lui spring datele din baza de date
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -80,7 +80,4 @@ public class User implements UserDetails { //acest userDetails ii "traduce" lui 
 
     @Override
     public boolean isEnabled() { return true; }
-
-
-
 }

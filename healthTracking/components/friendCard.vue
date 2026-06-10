@@ -1,5 +1,6 @@
 <script setup>
 import {useAuth} from "~/composable/useAuth.js";
+import {useSocial} from "~/composable/useSocials.js";
 
 const props = defineProps({
   username: String,
@@ -10,25 +11,13 @@ const props = defineProps({
 
 const {token}=useAuth();
 
+const{triggerChallengeUpdate}=useSocial();
+
 const streak=ref();
 
 
 
-async function startChallenge(){
-  const response=await fetch(`http://localhost:8080/challenge/${props.username}`,{
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    }
-  });
 
-  if(response.ok){
-    const data = await response.json();
-    console.log("challenge: ", data);
-  }
-
-}
 
 
 async function fetchStreak(){
@@ -36,10 +25,11 @@ async function fetchStreak(){
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
+      "Authorization": `Bearer ${token.value}`,
     }
   });
   if(response.ok){
+    console.log("streak", streak.value);
     streak.value=await response.text();
   }
 }
@@ -55,65 +45,10 @@ onMounted(async () => {
   <div
     class="relative bg-neutral-primary-soft max-w-xs w-full p-6 border border-default rounded-base shadow-xs"
   >
-    <button
-      id="dropdownButton"
-      data-dropdown-toggle="dropdown"
-      class="absolute top-2 end-2 text-body hover:text-heading bg-neutral-primary-soft box-border border border-transparent hover:bg-neutral-tertiary focus:ring-4 focus:ring-neutral-tertiary rounded-base p-1.5 focus:outline-none"
-      type="button"
-    >
-      <span class="sr-only">Open dropdown</span>
-      <svg
-        class="w-6 h-6"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke="currentColor"
-          stroke-linecap="round"
-          stroke-width="3"
-          d="M6 12h.01m6 0h.01m5.99 0h.01"
-        />
-      </svg>
-    </button>
-    <!-- Dropdown menu -->
-    <div
-      id="dropdown"
-      class="z-10 bg-neutral-primary-medium border border-default-medium rounded-base shadow-lg w-36 block hidden"
-    >
-      <ul
-        class="p-2 text-sm text-body font-medium"
-        aria-labelledby="dropdownButton"
-      >
-        <li>
-          <a
-            href="#"
-            class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md"
-            >Edit</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="inline-flex items-center w-full p-2 hover:bg-neutral-tertiary-medium hover:text-heading rounded-md"
-            >Export Data</a
-          >
-        </li>
-        <li>
-          <a
-            href="#"
-            class="inline-flex items-center w-full p-2 text-fg-danger hover:bg-neutral-tertiary-medium rounded-md"
-            >Delete</a
-          >
-        </li>
-      </ul>
-    </div>
+
     <div class="flex flex-col items-center">
-      <div class="absolute left-2 top-2">
-        🔥{{streak}}
+      <div class="absolute left-2 top-2 font-semibold italic">
+        🔥 {{streak}}
       </div>
       <img class="w-24 h-24 mb-6 rounded-full" alt="Bonnie image" />
       <h5 class="mb-0.5 text-xl font-semibold tracking-tight text-heading">
@@ -122,19 +57,19 @@ onMounted(async () => {
       <span class="text-sm text-body">{{ props.content }}</span>
       <span class="text-sm text-body">{{ props.createDate }}</span>
       <div class="flex mt-4 md:mt-6 gap-4">
-        <button
-          type="button"
-          @click="startChallenge"
-          class="inline-flex items-center text-black bg-brand box-border border border- hover:bg-brand-strong focus:ring-4 focus:ring-brand-medium shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
-        >
-          Challenge
-        </button>
-        <button
-          type="button"
-          class="inline-flex self-start w-auto text-body bg-neutral-secondary-medium box-border border border-default-medium hover:bg-neutral-tertiary-medium hover:text-heading focus:ring-4 focus:ring-neutral-tertiary shadow-xs font-medium leading-5 rounded-base text-sm px-4 py-2.5 focus:outline-none"
-        >
-          Message
-        </button>
+        <UButton
+          label="Challenge"
+          color="success"
+          @click="triggerChallengeUpdate(props.username)"
+        />
+
+        <USlideover title="Chat">
+          <UButton label="Message" color="neutral" variant="outline" />
+
+          <template #body>
+            <MessageChat :receiver="props.username" />
+          </template>
+        </USlideover>
       </div>
     </div>
   </div>

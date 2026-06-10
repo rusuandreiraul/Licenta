@@ -2,12 +2,14 @@ package health.tracking.application.controller;
 
 
 import health.tracking.application.service.AIService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/ai")
+
 @CrossOrigin(origins = "http://localhost:3000/")
 public class AIController {
 
@@ -17,12 +19,15 @@ public class AIController {
         this.aiService=aiService;
     }
 
-    @PostMapping("/chat")
-    public Map<String, String> chat(@RequestBody Map<String, String> payload){ // aici trimit {message: "mesajul userului"}
-        String userMessage=payload.get("message");
-        String aiResponse=aiService.askAI(userMessage);
-        return Map.of("text", aiResponse);
+    /*@GetMapping("/ai/daily-overview")
+    public ResponseEntity<String> getOverview(Authentication authentication){
+        String username=authentication.getName();
+        return ResponseEntity.ok(aiService.generateOverview(username));
+    }*/
 
+    @PostMapping("/ai/chat")
+    public ResponseEntity<String> chat(@RequestBody String message){
+        return ResponseEntity.ok(aiService.processUserMessage(message));
     }
 
 }

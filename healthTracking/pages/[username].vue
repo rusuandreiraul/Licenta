@@ -8,7 +8,6 @@ const { token } = useAuth();
 
 const isChatOpen = ref(false);
 
-
 const isFollowed = ref(false);
 
 const posts = ref([]);

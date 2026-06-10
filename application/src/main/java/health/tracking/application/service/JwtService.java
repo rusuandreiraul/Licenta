@@ -33,7 +33,7 @@ public class JwtService {
                 .compact();
     }
 
-    public String extractUsername(String token) {
+    public String extractUsername(String token) { //extragere username
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -42,9 +42,9 @@ public class JwtService {
                 .getSubject();
     }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+    public boolean isTokenValid(String token, UserDetails userDetails) { //validare token
         final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername());
+        return username.equals(userDetails.getUsername()); //se verifica username din token cu cel din userDetails.
     }
 
     public boolean isTokenExpired(String token) {

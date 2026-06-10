@@ -23,7 +23,7 @@ const props = defineProps({
   <UCard class="shadow-lg rounded-2xl border-none transition-all hover:-translate-y-2 hover:shadow-xl">
     <template #header>
       <div class="flex items-center gap-2 font-bold text-xl">
-        <span v-html="props.icon"></span>
+        <span v-html="props.icon" aria-hidden="true"></span>
         {{ props.title }}
       </div>
     </template>
@@ -67,13 +67,13 @@ const props = defineProps({
 
         <div class="grid grid-cols-2 gap-4 text-center">
           <div class="bg-white p-2 rounded-lg">
-            <p class="text-xs text-gray-400 uppercase">Scor</p>
+            <p class="text-xs text-gray-700 uppercase">Scor</p>
             <p class="font-bold text-purple-600 text-lg">
               {{ props.content?.quality }}/5
             </p>
           </div>
           <div class="bg-white p-2 rounded-lg">
-            <p class="text-xs text-gray-400 uppercase">Durată</p>
+            <p class="text-xs text-gray-700 uppercase">Durată</p>
             <p class="font-bold text-purple-600 text-lg">
               {{ props.content?.hoursSlept }}h
             </p>
@@ -191,7 +191,7 @@ const props = defineProps({
     </div>
 
     <template #footer>
-      <UButton variant="ghost" block color="gray" class="hover:bg-gray-100">
+      <UButton block color="gray" class="hover:bg-gray-100">
         Vezi detalii complete
       </UButton>
     </template>

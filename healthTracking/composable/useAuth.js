@@ -1,38 +1,40 @@
 import { ref } from "vue";
 
-const user = ref(null);
-
+// Folosim useCookie în loc de ref simple pentru a sincroniza serverul cu clientul
 export function useAuth() {
-  // Când se încarcă aplicația, verificăm dacă userul e salvat în localStorage
-  if (process.client && !user.value) {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      user.value = storedUser;
-    }
-  }
+  const router = useRouter();
 
-  function login(username) {
+
+  const user = useCookie("auth_user", { maxAge: 60 * 60 * 24 * 7 }); // se va pastra o saptamana
+  const token = useCookie("auth_token", { maxAge: 60 * 60 * 24 * 7 });
+
+  function login(username, userToken, remember = false) { //se va prelua checkboxul remember pentru a verifica daca se mentine sau nu autentificare
+
+    const cookieOptions = remember
+        ? { maxAge: 60 * 60 * 24 * 30, path: '/' } // 30 de zile
+        : { path: '/' };
+
+    const uCookie = useCookie("auth_user", cookieOptions);
+    const tCookie = useCookie("auth_token", cookieOptions);
+
+    uCookie.value = username;
+    tCookie.value = userToken;
+
     user.value = username;
-    if (process.client) {
-      localStorage.setItem("user", username);
-    }
+    token.value = userToken;
   }
 
   function logout() {
+    const uCookie = useCookie("auth_user");
+    const tCookie = useCookie("auth_token");
+
+    uCookie.value = null;
+    tCookie.value = null;
     user.value = null;
-    if (process.client) {
-      localStorage.removeItem("user");
-    }
+    token.value = null;
+
+    router.push("/");
   }
 
-  function getUser() {
-    return user.value;
-  }
-
-  return {
-    user,
-    login,
-    logout,
-    getUser,
-  };
+  return { user, token, login, logout };
 }

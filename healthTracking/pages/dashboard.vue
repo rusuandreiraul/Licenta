@@ -11,11 +11,12 @@ import {useGoals} from "~/composable/useGoals.js";
 // User
 const { user,token } = useAuth();
 
-const username = user.value;
+const username = computed(()=>user.value);
 
 const { getLastWeekDates } = useDateWeek();
 
 const userValue = ref({});
+
 
 const date = ref(today(getLocalTimeZone()));
 
@@ -23,7 +24,17 @@ const week = ref(getLastWeekDates(date.value));
 
 const {dataGoals, getGoals} = useGoals();
 
+definePageMeta({
+  middleware: 'auth'
+});
 
+
+useSeoMeta({
+  title: 'Dashboard Personal - Health Tracker',
+  description: 'Vizualizează progresul zilnic pentru activitate fizică, somn și nutriție integrat cu inteligență artificială.',
+  ogTitle: 'Dashboard Personal - Health Tracker',
+  ogDescription: 'Monitorizare inteligentă a stilului de viață.',
+});
 
 
 const activityData = ref({});
@@ -109,6 +120,12 @@ const formatDate = (calendarDate) => {
   return `${year}-${month}-${day}`;
 };
 
+const selectedFile = ref(null);
+
+function handleFileChange(event) {
+  selectedFile.value = event.target.files[0];
+}
+
 async function fetchUser() {
   try {
     const response = await fetch(`http://localhost:8080/profile`, {
@@ -127,25 +144,38 @@ async function fetchUser() {
 }
 
 async function fetchChanges() {
+  const formData = new FormData();
+
+  formData.append("height", userValue.value.height);
+  formData.append("weight", userValue.value.weight);
+
+
+  if (selectedFile.value) {
+    formData.append("profileImage", selectedFile.value);
+  }
+
   try {
     const response = await fetch(
       `http://localhost:8080/user-change`,
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           "Authorization": `Bearer ${token.value}`,
         },
-        body: JSON.stringify(userValue),
+        body: formData,
       }
     );
     if (response.ok) {
-      userValue.value = response.json();
+      const data=await response.json();
+      userValue.value = data;
+      console.log("user modificat ", userValue.value);
     }
   } catch (e) {
     console.error(e);
   }
 }
+
+
 
 
 
@@ -231,10 +261,16 @@ async function fetchDailyData() {
 }
 
 async function refreshFetch() {
-  // Așteaptă user, apoi goals, apoi datele zilnice
-  await fetchUser();
-  await fetchDailyData();
-  await fetchWeekData();
+  // Lansează toate cele 3 cereri HTTP în paralel pentru a reduce latența backend-ului
+  try {
+    await Promise.all([
+      fetchUser(),
+      fetchDailyData(),
+      fetchWeekData()
+    ]);
+  } catch (error) {
+    console.error("Eroare la încărcarea paralelă a datelor:", error);
+  }
 }
 
 watch(date, (newDate) => {
@@ -255,9 +291,9 @@ onMounted(async() => {
     class="min-h-screen w-full flex bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
   >
     <Sidebar />
-
-    <main v-if="user" class="flex-1 p-6 sm:ml-64 pt-5">
-      <div class="flex flex-col md:flex-row gap-6 h-screen items-start">
+<client-only>
+    <main  v-if="user" class="flex-1 p-6 sm:ml-64 pt-5">
+      <div  class="flex flex-col md:flex-row gap-6 min-h-screen items-start">
         <div class="flex-1 bg-gray-100 h-full rounded-lg p-4">
           <div>
             <h1 class="text-bold text-2xl">Salut, {{ username }} 👋</h1>
@@ -312,10 +348,13 @@ onMounted(async() => {
           >
             <!-- Avatar și nume -->
             <div class="flex flex-col items-center space-y-2">
-              <img
+              <NuxtImg
                 class="w-20 h-20 rounded-full border-2 border-indigo-500 object-cover"
-                src="https://via.placeholder.com/150"
+                :src="userValue.urlProfileImage"
                 alt="Avatar user"
+                width="80"
+                height="80"
+                loading="lazy"
               />
               <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
                 {{ username }}
@@ -345,31 +384,70 @@ onMounted(async() => {
 
             <UModal title="Edit profile">
               <UButton
-                label="Edit profile"
+
                 class="mt-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full text-sm font-medium transition-colors"
               >
+                Edit profile
+                <svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                </svg>
               </UButton>
               <template #body>
-                <div class="flex flex-col p-3 gap-2">
-                  <form method="post" onSubmit="fetchChanges()">
-                  <label>Password</label>
-                  <UInput type="password" placeholder="*******" />
-                  <label>Inaltime</label>
-                  <UInput
-                    type="number"
-                    placeholder="Introdu inaltime..."
-                    v-model="userValue.height"
-                  />
-                  <label>Greutate</label>
-                  <UInput
-                    type="number"
-                    placeholder="Introdu greutate..."
-                    v-model="userValue.weight"
-                  />
-                  <UButton
-                    label="Confirma modificari"
-                    class="mt-2 py-2"
-                  />
+                <div class="p-4">
+                  <form @submit.prevent="fetchChanges" class="flex flex-col gap-4">
+                    <div class="flex flex-col gap-1.5">
+                      <label for="password" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Parolă
+                      </label>
+                      <UInput
+                          id="password"
+                          type="password"
+                          placeholder="*******"
+                          icon="i-heroicons-lock-closed"
+                      />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                      <div class="flex flex-col gap-1.5">
+                        <label for="height" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Înălțime (cm)
+                        </label>
+                        <UInput
+                            id="height"
+                            type="number"
+                            v-model="userValue.height"
+                            placeholder="180"
+                        />
+                      </div>
+                      <div class="flex flex-col gap-1.5">
+                        <label for="weight" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Greutate (kg)
+                        </label>
+                        <UInput
+                            id="weight"
+                            type="number"
+                            v-model="userValue.weight"
+                            placeholder="75"
+                        />
+                      </div>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                      <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Imagine profil
+                      </label>
+                      <UInput
+                          type="file"
+                          @change="handleFileChange"
+                      />
+                    </div>
+                    <UButton
+                        type="submit"
+                        label="Confirmă modificările"
+                        block
+                        size="md"
+                        class="mt-2 font-semibold"
+                        color="indigo"
+                    />
                   </form>
                 </div>
               </template>
@@ -384,15 +462,20 @@ onMounted(async() => {
           </div>
 
           <!-- Calendar separat jos -->
+          <client-only>
           <div class="bg-gray-100 rounded-2xl p-4 flex-1">
             <UCalendar v-model="date" />
           </div>
+          </client-only>
         </div>
       </div>
     </main>
+    <template #fallback>
+      <!-- Ce vede utilizatorul o fracțiune de secundă până la hidratare -->
+      <div class="flex-1 p-6 sm:ml-64 pt-5 text-gray-500">Se încarcă datele...</div>
+    </template>
+    </client-only>
 
-    <p v-else class="text-red-500">
-      Trebuie să fii logat pentru a accesa această pagină.
-    </p>
+
   </div>
 </template>

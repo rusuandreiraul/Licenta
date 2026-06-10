@@ -109,11 +109,11 @@ onMounted(() => {
 <template>
   <UCard>
     <template #header>
-      <h5
+      <h1
         class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
       >
         Goals
-      </h5>
+      </h1>
     </template>
 
     <div class="grid grid-cols-3 justify-items-center">

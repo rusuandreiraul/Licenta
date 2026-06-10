@@ -1,5 +1,6 @@
 <script setup>
 import { ref, reactive } from "vue";
+import {isEmpty} from "@nuxt/ui/runtime/utils/index.js";
 
 const router = useRouter();
 const message = ref("");
@@ -12,26 +13,48 @@ const state = reactive({
   birthDate: undefined,
 });
 
+
+const today=ref("");
+
+
+const selectedFile = ref(null);
+
+function handleFileChange(event) {
+  selectedFile.value = event.target.files[0];
+}
 async function registerUser() {
+  const formData=new FormData();
+
+  formData.append("username", state.username);
+  formData.append("email", state.email);
+  formData.append("password", state.password);
+  formData.append("height", state.height);
+  formData.append("weight", state.weight);
+  formData.append("birthDate", state.birthDate);
+
+
+  if (selectedFile.value) {
+    formData.append("profileImage", selectedFile.value);
+  }
+
   try {
     const response = await fetch("http://localhost:8080/register", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(state),
+      // ATENTIE: Nu pune "Content-Type": "application/json"!
+      // Browserul va seta automat "multipart/form-data" cu boundary corect.
+      body: formData,
     });
 
     if (response.ok) {
-      message.value = "Te-ai inregistrat cu success!";
-      router.push("/index");
-    } else {
-      message.value = "Ceva nu a functionat corect, mai incerca!";
+      router.push("/login");
     }
   } catch (error) {
     console.error(error);
   }
 }
+onMounted(()=>{
+  today.value = new Date().toISOString().split('T')[0];
+})
 </script>
 
 <template>
@@ -97,6 +120,7 @@ async function registerUser() {
             class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white"
             required
           />
+          <p v-if="!isEmpty(state.password)  && (state.password.length<8)" class="text-red-500 text-sm italic">Parola trebuie să aibă o lungime minimă de 8 caractere</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -141,8 +165,23 @@ async function registerUser() {
             type="date"
             id="birthdate"
             v-model="state.birthDate"
+            :max="today"
             class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white"
             required
+          />
+
+        </div>
+        <div>
+          <label
+              for="image"
+              class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300"
+          >Imagine profil</label
+          >
+          <input
+              type="file"
+              id="image"
+              @change="handleFileChange"
+              class="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-2.5 focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:text-white"
           />
         </div>
 
@@ -157,7 +196,7 @@ async function registerUser() {
         <!-- Link spre login -->
         <p class="text-center text-sm mt-4 text-gray-600 dark:text-gray-400">
           Ai deja un cont?
-          <NuxtLink to="/login" class="text-green-500 hover:underline">
+          <NuxtLink to="/" class="text-green-500 hover:underline">
             Autentifică-te
           </NuxtLink>
         </p>

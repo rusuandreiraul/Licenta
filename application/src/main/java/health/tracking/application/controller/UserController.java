@@ -5,6 +5,7 @@ import health.tracking.application.dto.UserRequestDTO;
 import health.tracking.application.dto.UserResponseDTO;
 import health.tracking.application.service.JwtService;
 import health.tracking.application.service.UserService;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import org.mapstruct.control.MappingControl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class UserController {
     private JwtService jwtService;
 
     @PostMapping(value = "/register", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE) //spune ca contine si fisiere nu doar text
-    public ResponseEntity<?> registerUser(@ModelAttribute UserRequestDTO dto) { //modelAttribute folosi pentru multipart profile data
+    public ResponseEntity<?> registerUser(@Valid @ModelAttribute UserRequestDTO dto) { //modelAttribute folosi pentru multipart profile data
         UserResponseDTO response = userService.register(dto);
         if (response != null)
             return ResponseEntity.ok(response);

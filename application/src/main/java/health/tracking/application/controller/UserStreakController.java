@@ -24,7 +24,7 @@ public class UserStreakController {
     private UserStreakService userStreakService;
 
 
-    @PostMapping("/challenge") //refa asta cu challenge
+    @PostMapping("/challenge")
     public ResponseEntity<?> challangeUser(@RequestBody UserStreakRequestDTO dto,Authentication authentication){
         String sender=authentication.getName();
         dto.setSender(sender);

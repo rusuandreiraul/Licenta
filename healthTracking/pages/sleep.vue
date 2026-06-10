@@ -12,12 +12,30 @@ import { useDateWeek } from "~/composable/useDateWeek";
 import { useAuth } from "~/composable/useAuth";
 
 import QualitySleep from "~/components/qualitySleep.vue";
+import Chatbot from "~/components/chatbot.vue";
 
-const { user } = useAuth();
+const { user,token } = useAuth();
+
 const { getLastWeekDates } = useDateWeek();
 
 const df = new DateFormatter("en-US", {
   dateStyle: "medium",
+});
+
+const selectedId = ref(null);
+const showModal = ref(false);
+
+
+function openModal(id) {
+  selectedId.value = id;
+  showModal.value = true;
+}
+
+useSeoMeta({
+  title: 'Analiza Somnului - WellSync',
+  description: 'Vizualizează istoricul de somn',
+  ogTitle: 'Analiza somnului - WellSync',
+  ogDescription: 'Vizualizează istoricul de somn.',
 });
 
 // --- STATE-URI (Datele) ---
@@ -27,6 +45,8 @@ const lastQualitySleep = ref(0);
 const lastHoursSlept = ref(0); // Adăugat pentru a arăta și ultima durată
 const lastStress = ref(0);
 const lastMorningEnergy = ref(0);
+
+const sleepDataByDate=ref();
 
 const modelValueDate = ref(today(getLocalTimeZone()));
 const week = ref(getLastWeekDates(modelValueDate.value));
@@ -87,15 +107,17 @@ const chartOptions = ref({
 
 // --- FUNCȚII ASINCRONE (Fetch) ---
 async function fetchSleepByDateRange() {
-  if (!user.value) return;
+  if (!token.value) return;
 
   const selectedDate = modelValueDate.value.toString();
-  const username = user.value;
-
   try {
     const response = await fetch(
-      `http://localhost:8080/sleep-week/${selectedDate}/${username}`,
-      { method: "GET" }
+      `http://localhost:8080/sleep-week/${selectedDate}`,
+      { method: "GET",
+        headers: { "Content-Type": "application/json",
+          "Authorization": `Bearer ${token.value}`,
+        },
+      }
     );
 
     if (response.ok) {
@@ -111,7 +133,6 @@ async function fetchSleepByDateRange() {
         return;
       }
 
-      // 1. Calculează Calitatea Medie
       const quality = dataSleep.map((s) => s.quality);
       const sumQuality = quality.reduce((acc, current) => acc + current, 0);
       avgQuality.value = (sumQuality / quality.length).toFixed(1);
@@ -123,15 +144,9 @@ async function fetchSleepByDateRange() {
 
       series.value[0].data = hoursSlept; // Presupunem că datele vin deja în ordinea corectă a săptămânii
 
-      // 3. Setăm ultima valoare
-      lastQualitySleep.value = dataSleep[dataSleep.length - 1].quality;
-      lastHoursSlept.value = dataSleep[dataSleep.length - 1].hoursSlept;
-      lastStress.value = dataSleep[dataSleep.length - 1].stress;
-      lastMorningEnergy.value = dataSleep[dataSleep.length - 1].morningEnergy;
     }
   } catch (e) {
     console.error("Eroare la preluarea datelor de somn:", e);
-    // Asigură-te că UI-ul nu afișează date false la eroare
     avgQuality.value = 0;
     avgHoursSlept.value = 0;
     lastQualitySleep.value = 0;
@@ -140,15 +155,64 @@ async function fetchSleepByDateRange() {
   }
 }
 
+async function fetchSleepByDate(){
+  const selectedDate = modelValueDate.value.toString();
+  try {
+    const response = await fetch(`http://localhost:8080/dashboard-sleep/${selectedDate}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.value}`
+      }
+    });
+    if (response.ok) {
+      sleepDataByDate.value = await response.json();
+      lastStress.value=sleepDataByDate.value.stress;
+      lastQualitySleep.value=sleepDataByDate.value.quality;
+      lastHoursSlept.value = sleepDataByDate.value.hoursSlept;
+      lastMorningEnergy.value=sleepDataByDate.value.morningEnergy;
+    }
+    else{
+      lastStress.value=0;
+      lastQualitySleep.value=0;
+      lastHoursSlept.value = 0;
+      lastMorningEnergy.value=0;
+    }
+  }
+  catch(e){
+    console.error("Eroare la preluarea datelor de somn:", e);
+    }
+}
+
+async function deleteSleep(){
+try {
+  const response = await fetch(`http://localhost:8080/delete-sleep/${selectedId.value}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token.value}`
+    }
+  });
+  if (response.ok) {
+    alert("Datele despre somn din data selectata au fost sterse cu success");
+  }
+}
+catch(e){
+  console.error("Eroare la stergere datelor de somn:", e);
+}
+}
+
 // --- HOOKS și WATCHERS ---
 watch(modelValueDate, (newDate) => {
   week.value = getLastWeekDates(newDate);
   chartOptions.value.xaxis.categories = week.value;
   fetchSleepByDateRange();
+  fetchSleepByDate();
 });
 
 onMounted(() => {
   fetchSleepByDateRange();
+  fetchSleepByDate();
 });
 </script>
 
@@ -174,8 +238,27 @@ onMounted(() => {
                 <UCalendar v-model="modelValueDate" class="p-2" />
               </template>
             </UPopover>
-            <p class="text-gray-500 text-sm hidden sm:block">
-              Vizualizezi datele de somn săptămânale.
+           <div v-if="sleepDataByDate">
+             <UModal v-model="showModal">
+               <UButton label="Sterge" color="error" @click="openModal(sleepDataByDate.id)"/>
+               <template #content>
+                 <div class="p-4">
+                   <p>Sigur vrei să ștergi această activitate?</p>
+                   <div class="flex gap-3 justify-end mt-4">
+                     <button @click="showModal = false" class="px-4 py-2 bg-gray-300 rounded">
+                       Anulează
+                     </button>
+
+                     <button @click="deleteSleep" class="px-4 py-2 bg-red-500 hover: translate-1 text-white rounded">
+                       Șterge
+                     </button>
+                   </div>
+                 </div>
+               </template>
+             </UModal>
+           </div>
+            <p v-else class="italic text-sm text-gray-500">
+              Nu au fost gasite date despre somn pentru aceasta zi
             </p>
           </div>
 
@@ -187,11 +270,11 @@ onMounted(() => {
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4 items-stretch">
-          <QualitySleep :quality="lastQualitySleep" class="h-full" />
+          <QualitySleep :quality="lastQualitySleep" class="h-full transition-all hover:-translate-y-2 hover:shadow-xl" />
 
           <div class="grid grid-cols-2 grid-rows-2 gap-3">
             <div
-              class="p-4 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full"
+              class="p-4 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full transition-all hover:-translate-y-2 hover:shadow-xl"
             >
               <svg
                 class="w-6 h-6 text-gray-800 dark:text-white"
@@ -221,7 +304,7 @@ onMounted(() => {
             </div>
 
             <div
-              class="p-4 gap-1 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full"
+              class="p-4 gap-1 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full transition-all hover:-translate-y-2 hover:shadow-xl"
             >
               <svg
                 class="w-6 h-6 text-gray-800 dark:text-white"
@@ -247,7 +330,7 @@ onMounted(() => {
             </div>
 
             <div
-              class="p-4 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full"
+              class="p-4 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full transition-all hover:-translate-y-2 hover:shadow-xl"
             >
               <svg
                 class="w-6 h-6 text-gray-800 dark:text-white"
@@ -278,7 +361,7 @@ onMounted(() => {
             </div>
 
             <div
-              class="p-4 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full"
+              class="p-4 bg-white border border-gray-100 shadow-md rounded-xl flex flex-col justify-center items-center h-full transition-all hover:-translate-y-2 hover:shadow-xl"
             >
               <svg
                 class="w-6 h-6 text-gray-800 dark:text-white"
@@ -324,17 +407,16 @@ onMounted(() => {
       </div>
 
       <div
-        class="hidden lg:flex flex-col w-[350px] bg-white p-4 rounded-xl shadow-md sticky self-start top-4 h-[calc(100vh-32px)]"
+          class="hidden md:flex flex-col w-[350px] bg-gray-200 p-4 rounded-lg sticky top-0 h-screen"
       >
-        <h2 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">
-          🤖 Asistentul tău Personal
-        </h2>
-        <div class="h-full bg-gray-50 rounded-lg flex-1 overflow-y-auto">
+        <h2 class="text-gray-700 font-bold mb-2">Asistent AI</h2>
+        <div class="h-full bg-white rounded-lg">
           <Chatbot />
         </div>
       </div>
 
-      <div class="fixed bottom-4 right-4 lg:hidden z-50">
+      <!-- Mobile bubble AI -->
+      <div class="fixed bottom-4 right-4 md:hidden">
         <AddModal type="AI" :user="user" :date="modelValueDate" />
       </div>
     </main>

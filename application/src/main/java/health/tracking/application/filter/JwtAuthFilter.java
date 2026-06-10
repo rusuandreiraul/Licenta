@@ -28,25 +28,26 @@ public class JwtAuthFilter extends OncePerRequestFilter { //acesta clasa prinde 
         this.userDetailsService=userDetailsService;
     }
 
-    @Override
+    @Override //functie suprascrisa care primeste cererea, lantul de filtre
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
+        final String authHeader = request.getHeader("Authorization"); //se extrage header-ul "Authorization"
         final String jwt;
         final String username;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) { //se verifica daca nu incepe cu "Bearer " si nu exista
+            filterChain.doFilter(request, response);//aplica filtrul standard Spring
             return;
         }
 
         try {
-            jwt = authHeader.substring(7);
-            username = jwtService.extractUsername(jwt);
+            jwt = authHeader.substring(7); //extrage token de dupa bearer
+            username = jwtService.extractUsername(jwt); //extrage username
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) { //verifica daca exsita in contextul de securitate
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username); //cauta utilizatorul folosind functia din userDetailsService
 
-                if (jwtService.isTokenValid(jwt, userDetails)) {
+                if (jwtService.isTokenValid(jwt, userDetails)) { //verificare validitate token
+                    //creare obiect de tip UsernamePasswordAuthenticationToken care va fi folosit in Contextul de securitate.
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -55,8 +56,7 @@ public class JwtAuthFilter extends OncePerRequestFilter { //acesta clasa prinde 
                 }
             }
         } catch (Exception e) {
-            // Dacă token-ul e invalid, logăm eroarea și lăsăm cererea să meargă mai departe.
-            // Spring Security va decide ulterior dacă ruta necesită autentificare sau nu.
+            // Dacă token-ul e invalid, se va lasa ca Spring sa decida prin filtrele standard daca trebuie autentificare sau nu.
             System.out.println("JWT Error: " + e.getMessage());
         }
 

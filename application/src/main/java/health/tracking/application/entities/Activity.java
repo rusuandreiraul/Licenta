@@ -25,4 +25,14 @@ public class Activity {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @Override
+    public String toString() {
+        return "Activity{" +
+                "activityDate=" + activityDate +
+                ", activityType='" + activityType + '\'' +
+                ", calories=" + calories +
+                ", duration=" + duration +
+                '}';
+    }
 }

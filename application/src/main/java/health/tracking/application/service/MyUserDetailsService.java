@@ -1,12 +1,14 @@
 package health.tracking.application.service;
 
 import health.tracking.application.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -32,7 +34,7 @@ public class MyUserDetailsService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                new ArrayList<>() // Aici pui lista de roluri dacă ai
+                List.of(new SimpleGrantedAuthority("ROLE_USER")) // Aici pui lista de roluri dacă ai
         );
     }
 }

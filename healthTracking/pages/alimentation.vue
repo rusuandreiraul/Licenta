@@ -20,6 +20,14 @@ const { dataGoals, getGoals } = useGoals();
 
 const { getLastWeekDates } = useDateWeek();
 
+
+useSeoMeta({
+  title: 'Nutritie - WellSync',
+  description: 'Vizualizează jurnalul alimentar',
+  ogTitle: 'Nutritie - WellSync',
+  ogDescription: 'Vizualizează jurnalul alimentar.',
+});
+
 const df = new DateFormatter("en-US", {
   dateStyle: "medium",
 });
@@ -258,7 +266,7 @@ const progressPercent = computed(() => {
       <div
         class="hidden md:flex flex-col w-[350px] bg-gray-200 p-4 rounded-lg sticky top-0 h-screen"
       >
-        <h2 class="text-white font-bold mb-2">Asistent AI</h2>
+        <h2 class="text-gray-700 font-bold mb-2">Asistent AI</h2>
         <div class="h-full bg-white rounded-lg">
           <Chatbot />
         </div>
