@@ -21,6 +21,7 @@ import java.util.*;
 public class User implements UserDetails { //acest userDetails ii "traduce" lui spring datele din baza de date
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
     @Column(unique = true)
     private String username;

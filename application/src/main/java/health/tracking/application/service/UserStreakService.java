@@ -47,7 +47,8 @@ public class UserStreakService {
     public UserStreakResponseDTO addOrUpdateStreak(UserStreakRequestDTO dto) {
         User u1=userRepository.findByEmailOrUsername(dto.getReceiver(), dto.getReceiver());
         User u2=userRepository.findByEmailOrUsername(dto.getSender(), dto.getSender());
-
+        System.out.println("DEBUG USER 1" + u1);
+        System.out.println("DEBUG USER 2" + u2);
         if(u1==null || u2==null){
             return null;
         }

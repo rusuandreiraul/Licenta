@@ -28,7 +28,7 @@ const props = defineProps({
       </div>
     </template>
 
-    <div v-if="props.title === 'Activity'" class="flex flex-col gap-4">
+    <div v-if="props.title === 'Activitate fizică'" class="flex flex-col gap-4">
       <div
         v-for="(item, index) in props.content"
         :key="index"
@@ -54,7 +54,7 @@ const props = defineProps({
       </div>
     </div>
 
-    <div v-else-if="props.title === 'Sleep'">
+    <div v-else-if="props.title === 'Somn'">
       <div
         class="p-4 pb-25 bg-purple-50 rounded-xl border border-purple-100 flex flex-col gap-3"
       >

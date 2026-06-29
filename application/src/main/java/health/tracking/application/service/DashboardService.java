@@ -101,9 +101,10 @@ public class DashboardService {
             LocalDate startDate=d.minusDays(6);
             List<Integer> calories=activityRepository.findCaloriesByUserAndDateRange(u, startDate, d);
             List<Integer> qualitySleep=sleepRepository.findQualityByUserAndDateRange(u, startDate, d);
+            List<Integer> caloriesConsumed=alimentationRepository.findCaloriesByUserAndDateRange(u, startDate, d);
             weekData.setCalories(calories);
             weekData.setQualitySleep(qualitySleep);
-            weekData.setCaloriesConsumed(List.of(1230,120,100,230,200,1000,0));
+            weekData.setCaloriesConsumed(caloriesConsumed);
             return weekData;
         }
         return null;

@@ -16,4 +16,6 @@ public interface GoalLogRepository extends JpaRepository<GoalLog,Long> {
 
 
     List<GoalLog> findByUserAndDate(User u, LocalDate date);
+
+    List<GoalLog> findAllByDateBetween(LocalDate startDate, LocalDate endDate);
 }

@@ -31,7 +31,6 @@ public class UserStreakController {
         UserStreakResponseDTO response=userStreakService.addOrUpdateStreak(dto);
         if(response!=null){
             return ResponseEntity.ok(response);
-
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Nu a fost posibila creare unui streak");
     }

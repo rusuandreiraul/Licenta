@@ -34,29 +34,28 @@ public class JwtAuthFilter extends OncePerRequestFilter { //acesta clasa prinde 
         final String jwt;
         final String username;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) { //se verifica daca nu incepe cu "Bearer " si nu exista
-            filterChain.doFilter(request, response);//aplica filtrul standard Spring
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) { //se verifică daca nu începe cu "Bearer " sau nu există
+            filterChain.doFilter(request, response);//aplică filtrul standard Spring
             return;
         }
 
-        try {
-            jwt = authHeader.substring(7); //extrage token de dupa bearer
+        try { //daca exista
+            jwt = authHeader.substring(7); //extrage token de după Bearer
             username = jwtService.extractUsername(jwt); //extrage username
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) { //verifica daca exsita in contextul de securitate
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username); //cauta utilizatorul folosind functia din userDetailsService
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) { //verifică daca există în contextul de securitate
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(username); //caută utilizatorul folosind functia din userDetailsService
 
-                if (jwtService.isTokenValid(jwt, userDetails)) { //verificare validitate token
-                    //creare obiect de tip UsernamePasswordAuthenticationToken care va fi folosit in Contextul de securitate.
+                if (jwtService.isTokenValid(jwt, userDetails)) { //verificare validitare token
+                    //creare obiect de tip UsernamePasswordAuthenticationToken care va fi folosit în Contextul de securitate.
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    System.out.println("DEBUG: Autentificare reușită pentru: " + username);
                 }
             }
         } catch (Exception e) {
-            // Dacă token-ul e invalid, se va lasa ca Spring sa decida prin filtrele standard daca trebuie autentificare sau nu.
+            // Dacă token-ul e invalid, se va lăsa ca Spring sa decida prin filtrele standard dacă trebuie autentificare sau nu.
             System.out.println("JWT Error: " + e.getMessage());
         }
 

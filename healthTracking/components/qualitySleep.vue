@@ -72,7 +72,7 @@ const chartOptions = ref({
   stroke: {
     dashArray: 4,
   },
-  labels: ["Quality Sleep"],
+  labels: ["Calitatea somnului"],
 });
 </script>
 

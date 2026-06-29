@@ -31,22 +31,27 @@ public class GoalLogService {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(30);
 
-        // 2. Preluare loguri și filtrare (Direct din bază dacă e posibil, sau prin Stream)
-        List<GoalLog> goalLogListMonth = goalLogRepository.findAll().stream()
-                .filter(g -> g.getDate().isAfter(startDate) && g.getDate().isBefore(endDate))
-                .toList();
+        // Preluare loguri din ultimele 30 de zile
+        List<GoalLog> goalLogListMonth = goalLogRepository.findAllByDateBetween(startDate, endDate);
 
-        // 3. Gruparea și numărarea obiectivelor per utilizator
         return goalLogListMonth.stream()
+                // Grupare dupa ID-ul utilizatorului
                 .collect(Collectors.groupingBy(
-                        GoalLog::getUser,
+                        log -> log.getUser().getId(),
                         Collectors.counting()
                 ))
                 .entrySet().stream()
-                .sorted(Map.Entry.<User, Long>comparingByValue().reversed())
-
+                .sorted(Map.Entry.<Long, Long>comparingByValue().reversed())
                 .limit(3)
-                .map(entry -> userMapper.toDto(entry.getKey()))
+                .map(entry -> {
+                    User user = goalLogListMonth.stream()
+                            .map(GoalLog::getUser)
+                            .filter(u -> u.getId().equals(entry.getKey()))
+                            .findFirst()
+                            .orElse(null);
+                    return userMapper.toDto(user);
+                })
                 .collect(Collectors.toList());
     }
+
 }

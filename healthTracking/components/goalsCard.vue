@@ -112,7 +112,7 @@ onMounted(() => {
       <h1
         class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
       >
-        Goals
+        Obiective
       </h1>
     </template>
 
@@ -172,17 +172,17 @@ onMounted(() => {
     </div>
     <template #footer>
       <UModal v-if="user === props.targetUsername">
-        <UButton label="Edit Goals" />
+        <UButton label="Modificare obiective" class="text-black" />
 
         <template #content>
           <form @submit.prevent="setGoals" class="p-4 space-y-4">
-            <label for="activity">Activity (h/min)</label>
+            <label for="activity">Activitate (h/min)</label>
             <UInput id="activity" v-model="state.activity" type="number" />
 
-            <label for="sleep">Sleep (h)</label>
+            <label for="sleep">Somn (h)</label>
             <UInput id="sleep" v-model="state.sleep" type="number" />
 
-            <label for="alimentation">Alimentation (kcal)</label>
+            <label for="alimentation">Nutriție (kcal)</label>
             <UInput
               id="alimentation"
               v-model="state.alimentation"

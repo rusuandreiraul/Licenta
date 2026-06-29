@@ -46,6 +46,7 @@ public class SleepController {
     public ResponseEntity<?> deleteSleep(@PathVariable Long selectedId, Authentication authentication){
         String username=authentication.getName();
         String response=sleepService.deleteSleep(selectedId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/dashboard-sleep/{selectedDate}")

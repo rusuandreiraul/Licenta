@@ -97,4 +97,14 @@ public class AlimentationService {
             return "alimentare si goal log adaugate cu success!";
         }
 
+    public boolean deleteAlimentationById(Long id) {
+        alimentationRepository.deleteById(id);
+        if(alimentationRepository.findById(id).isEmpty()){
+           return true;
+        }
+        else{
+            throw new RuntimeException("Eroare la stergerea datelor de nutritie");
+        }
+
+    }
 }

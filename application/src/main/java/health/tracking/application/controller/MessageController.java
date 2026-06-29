@@ -32,9 +32,7 @@ public class MessageController { //este controllerul care gestioneaza partea de 
 
     @MessageMapping("/send")
     public void processMessage(@Payload MessageDTO messageDTO, Authentication authentication){
-        String sender=authentication.getName();
 
-        messageDTO.setSender(sender);
         Message m=messageService.saveMessage(messageDTO);
         messagingTemplate.convertAndSendToUser(messageDTO.getReceiver(),
                 "/queue/messages",

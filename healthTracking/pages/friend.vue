@@ -121,6 +121,7 @@ async function getPosts() {
     );
     if (response.ok) {
       posts.value = await response.json();
+      console.log("posts: ", posts);
     }
   } catch (e) {
     console.error(e);
@@ -190,7 +191,7 @@ onMounted(() => {
             🏆 Eu vs {{usernameBestStreak}}
           </div>
           <div class="flex justify-center gap-3">
-            <UButton variant="outline" class="flex-1" @click="triggerChallengeUpdate(usernameBestStreak)">Challenge</UButton>
+            <UButton variant="outline" class="flex-1" @click="triggerChallengeUpdate(usernameBestStreak.value)">Challenge</UButton>
             <USlideover title="Chat">
               <UButton label="Message" class="flex-1" color="success" />
 

@@ -21,6 +21,15 @@ const { dataGoals, getGoals } = useGoals();
 const { getLastWeekDates } = useDateWeek();
 
 
+const showModal = ref(false);
+const selectedId = ref(null);
+
+function openDeleteModal(id) {
+  selectedId.value = id;
+  showModal.value = true;
+  console.log(showModal.value);
+}
+
 useSeoMeta({
   title: 'Nutritie - WellSync',
   description: 'Vizualizează jurnalul alimentar',
@@ -63,17 +72,38 @@ const breakfast = ref([]);
 const lunch = ref([]);
 const dinner = ref([]);
 
+
+async function deleteAlimentation(){
+  try {
+    const response = await fetch(`http://localhost:8080/delete-alimentation/${selectedId.value}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.value}`
+      }
+    });
+    if (response.ok) {
+      alert("Datele despre nutriție selectate din data selectata au fost sterse cu success");
+      showModal.value=false;
+      fetchAlimentationByDate();
+    }
+  }
+  catch(e){
+    console.error("Eroare la stergere datelor de nutriție:", e);
+  }
+}
+
 async function fetchAlimentationByDate() {
   const selectedDate = modelValueDate.value.toString();
   const response = await fetch(
-    `http://localhost:8080/alimentation-data/${selectedDate}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token.value}`,
+      `http://localhost:8080/alimentation-data/${selectedDate}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token.value}`,
+        }
       }
-    }
   );
   if (response.ok) {
     receivedData.value = await response.json();
@@ -93,11 +123,11 @@ async function fetchAlimentationByDate() {
       allProteins.value += Number(item.proteins) || 0;
 
       if (item.type === "Mic Dejun") {
-        breakfast.value.push(item.nameProduct);
+        breakfast.value.push(item);
       } else if (item.type === "Pranz") {
-        lunch.value.push(item.nameProduct);
+        lunch.value.push(item);
       } else if (item.type === "Cina") {
-        dinner.value.push(item.nameProduct);
+        dinner.value.push(item);
       }
     });
 
@@ -134,10 +164,10 @@ const progressPercent = computed(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex">
+  <div class="min-h-screen flex relative">
     <Sidebar />
 
-    <main class="flex-1 p-4 sm:ml-64 flex gap-4">
+    <main class="flex-1 p-4 sm:pl-72 flex gap-4">
       <div class="flex-1 flex flex-col gap-4">
         <div
           class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-100"
@@ -175,35 +205,35 @@ const progressPercent = computed(() => {
         <div class="grid grid-cols-4 p-3 gap-2">
           <div>
             <AlimentationCard
-              title="Calories"
+              title="Calorii"
               :icon="icons.calories"
               :content="allCalories.toString()"
             />
           </div>
           <div>
             <AlimentationCard
-              title="Proteins"
+              title="Proteine"
               :icon="icons.proteins"
               :content="allProteins.toString() + 'g'"
             />
           </div>
           <div>
             <AlimentationCard
-              title="Fat"
+              title="Grăsimi"
               :icon="icons.fat"
               :content="allFat.toFixed(1) + 'g'"
             />
           </div>
           <div>
             <AlimentationCard
-              title="Carbos"
+              title="Carbohidrați"
               :icon="icons.carbos"
               :content="allCarbos.toFixed(1) + 'g'"
             />
           </div>
         </div>
         <div class="bg-gray-100 border-lg rounded-2xl p-4">
-          <i class="text-bold">Goal: {{ caloriesGoal }} kcal </i>
+          <i class="text-bold">Obiectiv: {{ caloriesGoal }} kcal </i>
           <UProgress v-model="progressPercent" status />
         </div>
         <div class="mt-8 mb-4 px-2">
@@ -215,10 +245,10 @@ const progressPercent = computed(() => {
         <div class="grid grid-cols-1 gap-6 p-2">
 
           <div v-for="meal in [
-    { title: 'Mic Dejun', data: breakfast, img: '/micdejun.jpeg', color: 'emerald', rec: '400-600' },
-    { title: 'Prânz', data: lunch, img: '/pranz.jpg', color: 'orange', rec: '600-800' },
-    { title: 'Cină', data: dinner, img: '/cina.jpeg', color: 'indigo', rec: '300-500' }
-  ]" :key="meal.title"
+            { title: 'Mic Dejun', data: breakfast, img: '/micdejun.jpeg', color: 'emerald', rec: '400-600' },
+            { title: 'Prânz', data: lunch, img: '/pranz.jpg', color: 'orange', rec: '600-800' },
+            { title: 'Cină', data: dinner, img: '/cina.jpeg', color: 'indigo', rec: '300-500' }
+          ]" :key="meal.title"
                class="group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 flex h-40">
 
             <div class="relative w-1/3 overflow-hidden">
@@ -236,10 +266,36 @@ const progressPercent = computed(() => {
                     Nicio înregistrare încă
                   </div>
                   <div v-else class="flex flex-wrap gap-2 mt-2">
-            <span v-for="item in meal.data" :key="item"
-                  class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold border border-gray-200 shadow-sm">
-              {{ item }}
-            </span>
+                    <span v-for="item in meal.data" :key="item.id"
+                          class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold border border-gray-200 shadow-sm flex items-center gap-1">
+                      {{ item.nameProduct }}
+                      <UModal
+                          title="Confirmè stergerea"
+                          :close="{
+                            color: 'primary',
+                            variant: 'outline',
+                            class: 'rounded-full'
+                              }">
+                        <button @click="openDeleteModal(item.id)" class="text-red-500 hover:text-red-700 font-bold ml-1 text-sm px-1">
+                        ×
+                      </button>
+                        <template #body>
+                          <div class="p-4">
+                        <p>Sigur vrei să ștergi această activitate?</p>
+                        <div class="flex gap-3 justify-end mt-4">
+                        <button @click="showModal = false" class="px-4 py-2 bg-gray-300 rounded">
+                          Anulează
+                        </button>
+
+                      <button @click="deleteAlimentation" class="px-4 py-2 bg-red-500 hover: translate-1 text-white rounded">
+                         Șterge
+                      </button>
+                   </div>
+                 </div>
+                        </template>
+
+                      </UModal>
+                    </span>
                   </div>
                 </div>
 

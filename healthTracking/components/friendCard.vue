@@ -1,4 +1,5 @@
 <script setup>
+import { ref, onMounted } from "vue";
 import {useAuth} from "~/composable/useAuth.js";
 import {useSocial} from "~/composable/useSocials.js";
 
@@ -15,9 +16,7 @@ const{triggerChallengeUpdate}=useSocial();
 
 const streak=ref();
 
-
-
-
+console.log("imaginie", props.urlImage);
 
 
 async function fetchStreak(){
@@ -32,6 +31,11 @@ async function fetchStreak(){
     console.log("streak", streak.value);
     streak.value=await response.text();
   }
+}
+
+async function onChallengeClick() {
+  await triggerChallengeUpdate(props.username);
+  await fetchStreak(); //reapelare pentru update la streak
 }
 
 onMounted(async () => {
@@ -50,7 +54,7 @@ onMounted(async () => {
       <div class="absolute left-2 top-2 font-semibold italic">
         🔥 {{streak}}
       </div>
-      <img class="w-24 h-24 mb-6 rounded-full" alt="Bonnie image" />
+      <img class="w-24 h-24 mb-6 rounded-full" :src="props.urlImage" alt="Bonnie image" />
       <h5 class="mb-0.5 text-xl font-semibold tracking-tight text-heading">
         {{ props.username }}
       </h5>
@@ -60,7 +64,7 @@ onMounted(async () => {
         <UButton
           label="Challenge"
           color="success"
-          @click="triggerChallengeUpdate(props.username)"
+          @click="onChallengeClick"
         />
 
         <USlideover title="Chat">

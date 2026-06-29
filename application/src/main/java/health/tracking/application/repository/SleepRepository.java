@@ -17,6 +17,7 @@ public interface SleepRepository extends JpaRepository<Sleep, Long> {
 
     @Query("""
         SELECT new health.tracking.application.dto.SleepDTO(
+             s.id,
              s.quality,
             s.hoursSlept,
             s.dateSleep,

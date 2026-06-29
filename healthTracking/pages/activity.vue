@@ -229,10 +229,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex bg-gray-50">
+  <div class="min-h-screen flex bg-gray-50 relative">
     <Sidebar />
 
-    <main class="flex-1 p-4 sm:ml-64 flex gap-6">
+    <main class="flex-1 p-4 sm:pl-72 flex gap-6">
       <div class="flex-1 flex flex-col gap-6">
         <div
           class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-100"
@@ -259,7 +259,7 @@ onMounted(async () => {
             <p class="text-sm font-semibold text-gray-700 hidden sm:block">
               Înregistrează o activitate:
             </p>
-            <AddModal type="activity" :date="modelValueDate" />
+            <AddModal type="Adăugare activitate" :date="modelValueDate" />
           </div>
         </div>
         <div class="grid grid-cols-2 justify-center items-center bg-white rounded-xl shadow-sm border border-gray-100 items-start"">
@@ -271,10 +271,10 @@ onMounted(async () => {
             <span class="font-bold">Calorii Arse:</span>
             {{ activityDataAll.calories }}
             <div v-if="activityDataAll.calories>300">
-              <i class="text-green-500">Foarte bine, azi ai facut show!</i>
+              <i class="text-green-500">Foarte bine!</i>
             </div>
             <div v-else>
-              <i class="text-red-500">Continua tot asa si treci peste obiectiv</i>
+              <i class="text-red-600">Continua tot așa și depășește obiectivul prefixat!</i>
             </div>
           </div>
           <div class="flex-1 flex-col p-3">

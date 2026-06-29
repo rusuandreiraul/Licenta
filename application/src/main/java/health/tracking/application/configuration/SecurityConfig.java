@@ -33,11 +33,6 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    /*.requestMatchers( "/chat-history/**").permitAll()
-                        .requestMatchers("/leaderboard").permitAll()
-                        .requestMatchers("/user-change").permitAll() */
-    //"/gs-guide-websocket/**" astea vor trebuie adaugate dupa sa vedem daca functioneaza aplicatia
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -46,12 +41,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll() //se permite accesul fara token pentru register si login
                         .requestMatchers("/register").permitAll()
+                        .requestMatchers("/forgot-password").permitAll()
+                        .requestMatchers("/reset-password").permitAll()
+                        .requestMatchers("/gs-guide-websocket/**").permitAll()
                         .requestMatchers("/error").permitAll() //pentru validarea erorilor
                         .anyRequest().authenticated() //accesul pentru restul endpointurilor este blocat fara token
 
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Nu se folosesc JSESSIONID
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Nu se foloseste JSESSIONID
                 )
                 // filtrul personalizat inaintea filtrului de autentificare standard
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

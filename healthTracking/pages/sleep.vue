@@ -90,7 +90,7 @@ const chartOptions = ref({
     style: { fontSize: "16px", fontWeight: "bold" },
   },
   xaxis: {
-    categories: week.value,
+    categories: Object.values(week.value),
     labels: {
       style: {
         colors: "#6B7280", // Text mai puțin intens
@@ -112,47 +112,62 @@ async function fetchSleepByDateRange() {
   const selectedDate = modelValueDate.value.toString();
   try {
     const response = await fetch(
-      `http://localhost:8080/sleep-week/${selectedDate}`,
-      { method: "GET",
-        headers: { "Content-Type": "application/json",
-          "Authorization": `Bearer ${token.value}`,
-        },
-      }
+        `http://localhost:8080/sleep-week/${selectedDate}`,
+        { method: "GET",
+          headers: { "Content-Type": "application/json",
+            "Authorization": `Bearer ${token.value}`,
+          },
+        }
     );
 
     if (response.ok) {
       const dataSleep = await response.json();
-      console.log("data sleep: ", dataSleep);
-      if (dataSleep.length === 0) {
-        // Resetăm valorile dacă nu sunt date
-        avgQuality.value = 0;
-        avgHoursSlept.value = 0;
-        lastQualitySleep.value = 0;
-        lastHoursSlept.value = 0;
-        series.value[0].data = Array(7).fill(0);
+
+      if (!dataSleep || dataSleep.length === 0) {
+        resetSleepData();
         return;
       }
 
-      const quality = dataSleep.map((s) => s.quality);
-      const sumQuality = quality.reduce((acc, current) => acc + current, 0);
-      avgQuality.value = (sumQuality / quality.length).toFixed(1);
+      // 1. Calcul medii
+      const validQuality = dataSleep.map((s) => s.quality).filter(q => q !== undefined && q !== null);
+      const sumQuality = validQuality.reduce((acc, current) => acc + current, 0);
+      avgQuality.value = validQuality.length ? (sumQuality / validQuality.length).toFixed(1) : 0;
 
-      // 2. Calculează Orele Medii Dormite și actualizează seria graficului
-      const hoursSlept = dataSleep.map((s) => s.hoursSlept);
-      const sumHours = hoursSlept.reduce((acc, hours) => acc + hours, 0);
-      avgHoursSlept.value = (sumHours / hoursSlept.length).toFixed(1);
+      const validHours = dataSleep.map((s) => s.hoursSlept).filter(h => h !== undefined && h !== null);
+      const sumHours = validHours.reduce((acc, hours) => acc + hours, 0);
+      avgHoursSlept.value = validHours.length ? (sumHours / validHours.length).toFixed(1) : 0;
 
-      series.value[0].data = hoursSlept; // Presupunem că datele vin deja în ordinea corectă a săptămânii
+      // 2. Transformăm obiectul săptămânii într-un array curat: ['2026-06-08', '2026-06-09', ...]
+      const daysArray = Object.values(week.value);
 
+      // 3. Aliniem orele de somn cu acest array
+      const alignedHoursData = daysArray.map((dateStr) => {
+        const targetDate = dateStr.toString().trim();
+
+        const matchingDay = dataSleep.find((s) => {
+          if (!s.date) return false;
+          const backendDate = s.date.toString().split('T')[0].trim();
+          return backendDate === targetDate;
+        });
+
+        return matchingDay ? matchingDay.hoursSlept : 0;
+      });
+
+      // Trimitem datele aliniate corect către grafic
+      series.value[0].data = alignedHoursData;
     }
   } catch (e) {
     console.error("Eroare la preluarea datelor de somn:", e);
-    avgQuality.value = 0;
-    avgHoursSlept.value = 0;
-    lastQualitySleep.value = 0;
-    lastHoursSlept.value = 0;
-    series.value[0].data = Array(7).fill(0);
+    resetSleepData();
   }
+}
+
+function resetSleepData() {
+  avgQuality.value = 0;
+  avgHoursSlept.value = 0;
+  lastQualitySleep.value = 0;
+  lastHoursSlept.value = 0;
+  series.value[0].data = Array(7).fill(0);
 }
 
 async function fetchSleepByDate(){
@@ -167,6 +182,7 @@ async function fetchSleepByDate(){
     });
     if (response.ok) {
       sleepDataByDate.value = await response.json();
+      console.log(sleepDataByDate.value);
       lastStress.value=sleepDataByDate.value.stress;
       lastQualitySleep.value=sleepDataByDate.value.quality;
       lastHoursSlept.value = sleepDataByDate.value.hoursSlept;
@@ -195,6 +211,10 @@ try {
   });
   if (response.ok) {
     alert("Datele despre somn din data selectata au fost sterse cu success");
+    showModal.value=false;
+    sleepDataByDate.value = null;
+    fetchSleepByDate();
+    fetchSleepByDateRange();
   }
 }
 catch(e){
@@ -205,7 +225,7 @@ catch(e){
 // --- HOOKS și WATCHERS ---
 watch(modelValueDate, (newDate) => {
   week.value = getLastWeekDates(newDate);
-  chartOptions.value.xaxis.categories = week.value;
+  chartOptions.value.xaxis.categories = Object.values(week.value);
   fetchSleepByDateRange();
   fetchSleepByDate();
 });
@@ -217,10 +237,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex bg-gray-50">
+  <div class="min-h-screen flex bg-gray-50 relative">
     <Sidebar />
 
-    <main class="flex-1 p-4 sm:ml-64 flex gap-6">
+    <main class="flex-1 p-4 sm:pl-72 flex gap-6">
       <div class="flex-1 flex flex-col gap-6">
         <div
           class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-100"
@@ -239,7 +259,13 @@ onMounted(() => {
               </template>
             </UPopover>
            <div v-if="sleepDataByDate">
-             <UModal v-model="showModal">
+             <UModal
+                 title="Confirmă stergerea"
+                 :close="{
+                            color: 'primary',
+                            variant: 'outline',
+                            class: 'rounded-full'
+                              }">
                <UButton label="Sterge" color="error" @click="openModal(sleepDataByDate.id)"/>
                <template #content>
                  <div class="p-4">
@@ -257,7 +283,7 @@ onMounted(() => {
                </template>
              </UModal>
            </div>
-            <p v-else class="italic text-sm text-gray-500">
+            <p v-else class="italic text-sm text-gray-700">
               Nu au fost gasite date despre somn pentru aceasta zi
             </p>
           </div>
@@ -399,7 +425,7 @@ onMounted(() => {
           </client-only>
           <div
             v-if="series[0].data.every((v) => v === 0)"
-            class="text-center text-gray-500 italic mt-4 p-4 border-t"
+            class="text-center text-gray-700 italic mt-4 p-4 border-t"
           >
             Nu există date de somn pentru această săptămână.
           </div>

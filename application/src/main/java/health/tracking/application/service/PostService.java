@@ -48,9 +48,15 @@ public class PostService {
         if(u==null){
              return new ArrayList<>();
         }
+        List<PostResponseDTO> listFinal=new ArrayList<>();
         Set<User> follow=u.getFollowing();
         List<Post> l=postRepository.findAllByPublishDateAndUserIn(now, follow);
-        return l.stream().map(post->postMapper.toDto(post)).collect(Collectors.toList());
+        for(Post p: l){
+            PostResponseDTO post=postMapper.toDto(p);
+            post.setUrlImage(p.getUser().getUrlProfileImage());
+            listFinal.add(post);
+        }
+        return listFinal;
     }
 
     public List<PostResponseDTO> findAllPostsByUser(String username) {

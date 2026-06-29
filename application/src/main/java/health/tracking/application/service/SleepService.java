@@ -67,7 +67,10 @@ public class SleepService {
         sleep.setQuality(s.getQuality());
         sleep.setHoursSlept(s.getHoursSlept());
         sleep.setDateSleep(date);
+        sleep.setStress(s.getStress());
+        sleep.setMorningEnergy(s.getMorningEnergy());
         sleep.setUser(u);
+        System.out.println(sleep);
         sleepRepository.save(sleep);
 
         Goal g = goalRepository.findByUserAndType(u, "Sleep");

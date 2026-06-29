@@ -43,11 +43,10 @@ public class ActivityController {
     }
 
     @DeleteMapping("activity/delete-activity/{selectedId}")
-    public ResponseEntity<?>deleteActivity(@PathVariable Long selectedId, Authentication authentication){
-        String username=authentication.getName();
-        String response=activityService.deleteActivity(selectedId, username);
+    public ResponseEntity<?>deleteActivity(@PathVariable Long selectedId, Authentication authentication) {
+        String username = authentication.getName();
+        String response = activityService.deleteActivity(selectedId, username);
 
         return ResponseEntity.ok(response);
     }
-
 }

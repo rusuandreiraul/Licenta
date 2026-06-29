@@ -25,7 +25,7 @@ const isActive = (path) => route.path === path;
     data-drawer-toggle="logo-sidebar"
     aria-controls="logo-sidebar"
     type="button"
-    class="fixed top-4 left-4 z-50 inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+    class="fixed top-4 left-4 z-[100] inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
   >
     <span class="sr-only">Open sidebar</span>
     <svg
@@ -44,9 +44,10 @@ const isActive = (path) => route.path === path;
   </button>
   <aside
     id="logo-sidebar"
-    class="fixed top-0 left-0 z-40 w-64 h-screen pt-10 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+    class="fixed top-0 left-0 z-[100] w-64 h-screen pt-10 transition-transform -translate-x-full bg-white border-r border-gray-200 sm:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
     aria-label="Sidebar"
     data-drawer-backdrop="false"
+    data-drawer-body-scrolling="true"
     data-drawer-placement="left"
   >
     <div
@@ -70,7 +71,7 @@ const isActive = (path) => route.path === path;
             :class="[
               'flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 hover:text-black dark:hover:bg-gray-700 group',
               isActive('/dashboard')
-                ? 'bg-green-500 text-white dark:bg-green-600'
+                ? 'bg-green-500 text-black dark:bg-green-600'
                 : '',
             ]"
           >
@@ -92,7 +93,7 @@ const isActive = (path) => route.path === path;
               />
             </svg>
 
-            <span class="ms-3">Summary</span>
+            <span class="ms-3">Acasă</span>
           </a>
         </li>
         <li>
@@ -101,7 +102,7 @@ const isActive = (path) => route.path === path;
             :class="[
               'flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group',
               isActive('/activity')
-                ? 'bg-green-500 text-white dark:bg-green-600'
+                ? 'bg-green-500 text-black dark:bg-green-600'
                 : '',
             ]"
           >
@@ -122,7 +123,7 @@ const isActive = (path) => route.path === path;
                 d="M4 4.5V19a1 1 0 0 0 1 1h15M7 14l4-4 4 4 5-5m0 0h-3.207M20 9v3.207"
               />
             </svg>
-            <span class="flex-1 ms-3 whitespace-nowrap">Activity</span>
+            <span class="flex-1 ms-3 whitespace-nowrap">Activitate</span>
           </a>
         </li>
         <li>
@@ -131,7 +132,7 @@ const isActive = (path) => route.path === path;
             :class="[
               'flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group',
               isActive('/sleep')
-                ? 'bg-green-500 text-white dark:bg-green-600'
+                ? 'bg-green-500 text-black dark:bg-green-600'
                 : '',
             ]"
           >
@@ -152,7 +153,7 @@ const isActive = (path) => route.path === path;
                 d="M18 17v2M12 5.5V10m-6 7v2m15-2v-4c0-1.6569-1.3431-3-3-3H6c-1.65685 0-3 1.3431-3 3v4h18Zm-2-7V8c0-1.65685-1.3431-3-3-3H8C6.34315 5 5 6.34315 5 8v2h14Z"
               />
             </svg>
-            <span class="flex-1 ms-3 whitespace-nowrap">Sleep</span>
+            <span class="flex-1 ms-3 whitespace-nowrap">Somn</span>
           </a>
         </li>
         <li>
@@ -161,7 +162,7 @@ const isActive = (path) => route.path === path;
             :class="[
               'flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group',
               isActive('/alimentation')
-                ? 'bg-green-500 text-white dark:bg-green-600'
+                ? 'bg-green-500 text-black dark:bg-green-600'
                 : '',
             ]"
           >
@@ -184,7 +185,7 @@ const isActive = (path) => route.path === path;
               />
             </svg>
 
-            <span class="flex-1 ms-3 whitespace-nowrap">Alimentation</span>
+            <span class="flex-1 ms-3 whitespace-nowrap">Nutriție</span>
           </a>
         </li>
         <li>
@@ -214,10 +215,10 @@ const isActive = (path) => route.path === path;
               />
             </svg>
 
-            <span class="flex-1 ms-3 whitespace-nowrap">Friend</span>
+            <span class="flex-1 ms-3 whitespace-nowrap">Comunitate</span>
           </a>
         </li>
-        <!-- My Account -->
+
         <li class="absolute bottom-16 w-full pr-6"> <!-- Am ajustat poziția și lățimea -->
           <ULink
               :to="`/${user.user.value}`"
@@ -230,7 +231,7 @@ const isActive = (path) => route.path === path;
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0 0a8.949 8.949 0 0 0 4.951-1.488A3.987 3.987 0 0 0 13 16h-2a3.987 3.987 0 0 0-3.951 3.512A8.948 8.948 0 0 0 12 21Zm3-11a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
             </svg>
 
-            <span class="flex-1 ms-3 whitespace-nowrap">My account</span>
+            <span class="flex-1 ms-3 whitespace-nowrap">Contul meu</span>
           </ULink>
         </li>
 
@@ -243,7 +244,7 @@ const isActive = (path) => route.path === path;
             <svg class="w-6 h-6 text-red-800 dark:text-red group-hover:text-red-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
               <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H8m12 0-4 4m4-4-4-4M9 4H7a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h2"/>
             </svg>
-            <span class="flex-1 ms-3 text-left text-red-800 whitespace-nowrap">Logout</span>
+            <span class="flex-1 ms-3 text-left text-red-800 whitespace-nowrap">Ieșire</span>
           </button>
         </li>
       </ul>

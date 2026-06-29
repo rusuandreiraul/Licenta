@@ -45,15 +45,15 @@ const alimentationData = ref([]);
 const seriesRadial = ref([0, 0, 0]);
 const seriesBar = ref([
   {
-    name: "Exercise Calories",
+    name: "Calorii arse",
     data: [0, 0, 0, 0, 0, 0, 0],
   },
   {
-    name: "Sleep",
+    name: "Durata somnului",
     data: [0, 0, 0, 0, 0, 0, 0],
   },
   {
-    name: "Calories Consumed",
+    name: "Calorii consumate",
     data: [0, 0, 0, 0, 0, 0, 0],
   },
 ]);
@@ -65,6 +65,9 @@ const chartOptionsBar = ref({
     type: "bar",
     height: 320,
     toolbar: { show: false },
+    animations:{
+      enabled: false,
+    }
   },
   colors: chartColors,
   plotOptions: {
@@ -76,23 +79,45 @@ const chartOptionsBar = ref({
     },
   },
   dataLabels: { enabled: false },
-  stroke: { show: true, width: 15, colors: ["transparent"] },
+  stroke: { show: true, width: 2, colors: ["transparent"] },
   xaxis: {
-    categories: week.value,
+    categories: week.value.reverse(),
     labels: { style: { colors: "#374151", fontSize: "12px" } },
   },
-  yaxis: {
-    title: { text: "Values", style: { color: "#374151", fontSize: "12px" } },
-  },
+  yaxis: [
+    {
+      // Axa 1 (Stânga) - Va gestiona scara mare pentru toate caloriile
+      seriesName: "Exercise Calories",
+      title: { text: "Calorii (Arse / Consumate)", style: { color: "#3b82f6" } },
+      labels: { style: { colors: "#374151" } }
+    },
+    {
+      // Axa 2 (Dreapta) - scara mai mica pentru valorile somnului
+      seriesName: "Sleep",
+      opposite: true,
+      max: 5,
+      min: 0,
+      title: { text: "Calitate Somn (0 - 5)", style: { color: "#8b5cf6" } },
+      labels: { style: { colors: "#8b5cf6" } }
+    },
+    {
+      // Axa 3 - O forțăm să folosească IDENTIC scara primei axe
+      seriesName: "Exercise Calories",
+      show: false
+    }
+  ],
   fill: { opacity: 1 },
   tooltip: {
+    shared: true,
+    intersect: false,
     y: { formatter: (val) => val },
   },
 });
 
-
 const chartOptionsRadial = ref({
-  chart: { height: 300, width: 200, type: "radialBar" },
+  chart: { height: 300, width: 200, type: "radialBar", animations:{
+      enabled: false,
+    } },
   colors: chartColors,
   plotOptions: {
     radialBar: {
@@ -174,9 +199,6 @@ async function fetchChanges() {
     console.error(e);
   }
 }
-
-
-
 
 
 async function fetchWeekData() {
@@ -275,7 +297,7 @@ async function refreshFetch() {
 
 watch(date, (newDate) => {
   week.value = getLastWeekDates(newDate);
-  chartOptionsBar.value.xaxis.categories = week.value;
+  chartOptionsBar.value.xaxis.categories = week.value.reverse();
   fetchDailyData();
   fetchWeekData();
 });
@@ -288,11 +310,11 @@ onMounted(async() => {
 
 <template>
   <div
-    class="min-h-screen w-full flex bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100"
+    class="min-h-screen w-full flex bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 relative"
   >
     <Sidebar />
 <client-only>
-    <main  v-if="user" class="flex-1 p-6 sm:ml-64 pt-5">
+    <main  v-if="user" class="flex-1 p-6 sm:pl-72 pt-5">
       <div  class="flex flex-col md:flex-row gap-6 min-h-screen items-start">
         <div class="flex-1 bg-gray-100 h-full rounded-lg p-4">
           <div>
@@ -308,7 +330,7 @@ onMounted(async() => {
                   :series="seriesRadial"
                 />
               </client-only>
-              All progress in one chart
+              Tot progresul într-un singur grafic
             </div>
             <div class="bg-white rounded-2xl transition-all hover:-translate-y-2 hover:shadow-xl">
               <client-only>
@@ -325,17 +347,17 @@ onMounted(async() => {
 
           <div class="grid grid-cols-3 p-2 gap-2 ">
             <DashboardCard
-              title="Activity"
+              title="Activitate fizică"
               :icon="icons.activity"
               :content="activityData"
             />
             <DashboardCard
-              title="Sleep"
+              title="Somn"
               :icon="icons.sleep"
               :content="sleepData"
             />
             <DashboardCard
-              title="Alimentation"
+              title="Nutriție"
               :icon="icons.alimentation"
               :content="alimentationData"
             />
@@ -349,7 +371,7 @@ onMounted(async() => {
             <!-- Avatar și nume -->
             <div class="flex flex-col items-center space-y-2">
               <NuxtImg
-                class="w-20 h-20 rounded-full border-2 border-indigo-500 object-cover"
+                class="w-20 h-20 rounded-full border-2 border-green-500 object-cover"
                 :src="userValue.urlProfileImage"
                 alt="Avatar user"
                 width="80"
@@ -363,31 +385,31 @@ onMounted(async() => {
 
             <div class="grid grid-cols-3 gap-2 text-center w-full">
               <div class="flex flex-col items-center">
-                <span class="text-gray-400 text-sm">Weight</span>
+                <span class="text-gray-700 text-sm">Greutate</span>
                 <span class="text-lg font-medium text-gray-800 dark:text-white">
                   {{ userValue.weight || "-" }} kg
                 </span>
               </div>
               <div class="flex flex-col items-center">
-                <span class="text-gray-400 text-sm">Height</span>
+                <span class="text-gray-700 text-sm">Înalțime</span>
                 <span class="text-lg font-medium text-gray-800 dark:text-white">
                   {{ userValue.height || "-" }} cm
                 </span>
               </div>
               <div class="flex flex-col items-center">
-                <span class="text-gray-400 text-sm">Birth Date</span>
+                <span class="text-gray-700 text-sm">Data de naștere</span>
                 <span class="text-lg font-medium text-gray-800 dark:text-white">
                   {{ userValue.birthDate || "-" }}
                 </span>
               </div>
             </div>
 
-            <UModal title="Edit profile">
+            <UModal title="Modificare profil">
               <UButton
 
-                class="mt-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-full text-sm font-medium transition-colors"
+                class="mt-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-black rounded-full text-sm font-medium transition-colors"
               >
-                Edit profile
+                Modificare profil
                 <svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                   <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
                 </svg>
@@ -438,6 +460,11 @@ onMounted(async() => {
                       <UInput
                           type="file"
                           @change="handleFileChange"
+                          :ui="{
+    file: {
+      base: 'file:bg-white file:text-gray-700 file:border file:border-gray-300 file:rounded-md file:hover:bg-gray-50 file:cursor-pointer'
+    }
+  }"
                       />
                     </div>
                     <UButton
