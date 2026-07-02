@@ -101,29 +101,26 @@ public class DashboardService {
             LocalDate endDate = LocalDate.parse(selectedDate);
             LocalDate startDate = endDate.minusDays(6);
 
-            // 1. Preluăm listele brute din baza de date pentru întreg intervalul
+            // 1. Preluare date
             List<Activity> activities = activityRepository.findByUserAndDateRange(u, startDate, endDate);
             List<SleepDTO> sleeps = sleepRepository.findSleepByDateRange(startDate, endDate, u.getUsername());
             List<Alimentation> foods = alimentationRepository.findByUserAndDateRange(u, startDate, endDate);
 
-            // 2. Pregătim listele finale aliniate de exact 7 elemente
+            // 2. listele finale aliniate de exact 7 elemente
             List<Integer> alignedCalories = new ArrayList<>();
             List<Integer> alignedQualitySleep = new ArrayList<>();
             List<Double> alignedCaloriesConsumed = new ArrayList<>();
 
-            // 3. Iterăm prin fiecare zi din interval (de la startDate la endDate)
-            // ATENȚIE: Mergem crescător (startDate -> endDate). Pe front-end avem deja .reverse() care le va întoarce cum ai vrut
             for (LocalDate current = startDate; !current.isAfter(endDate); current = current.plusDays(1)) {
                 final LocalDate dateCursor = current;
 
-                // Aliniere Calorii Arse
+
                 int caloriesSum = activities.stream()
-                        .filter(a -> a.getActivityDate().equals(dateCursor)) // înlocuiește cu getter-ul tău de dată
-                        .mapToInt(Activity::getCalories)               // înlocuiește cu getter-ul tău de calorii
+                        .filter(a -> a.getActivityDate().equals(dateCursor))
+                        .mapToInt(Activity::getCalories)
                         .sum();
                 alignedCalories.add(caloriesSum);
 
-                // Aliniere Ore/Calitate Somn
                 int sleepVal = sleeps.stream()
                         .filter(s -> s.getDateSleep().equals(dateCursor))
                         .mapToInt(SleepDTO::getHoursSlept)
@@ -131,7 +128,7 @@ public class DashboardService {
                         .orElse(0);
                 alignedQualitySleep.add(sleepVal);
 
-                // Aliniere Calorii Consumate
+
                 double caloriesConsumedSum = foods.stream()
                         .filter(f -> f.getMealDate().equals(dateCursor))
                         .mapToDouble(Alimentation::getCalories)
@@ -139,7 +136,7 @@ public class DashboardService {
                 alignedCaloriesConsumed.add(caloriesConsumedSum);
             }
 
-            // 4. Setăm listele perfect structurate în DTO
+
             weekData.setCalories(alignedCalories);
             weekData.setQualitySleep(alignedQualitySleep);
             weekData.setCaloriesConsumed(alignedCaloriesConsumed);
