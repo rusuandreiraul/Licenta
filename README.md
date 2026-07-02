@@ -46,7 +46,7 @@ Deschideți și editați fișierul `application.properties` localizat în `appli
 
 ```properties
 # Sincronizare Conexiune PostgreSQL
-spring.datasource.url=jdbc:postgresql://localhost:5432/SmartHealthTracking
+spring.datasource.url=jdbc:postgresql://localhost:5432/wellsync
 spring.datasource.username=postgres
 spring.datasource.password=andrei
 spring.datasource.driver-class-name=org.postgresql.Driver
