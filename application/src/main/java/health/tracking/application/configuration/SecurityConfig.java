@@ -41,15 +41,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login").permitAll() //se permite accesul fara token pentru register si login
                         .requestMatchers("/register").permitAll()
-                        .requestMatchers("/forgot-password").permitAll()
+                        .requestMatchers("/forgot-password").permitAll() //se permite accesul pentru resetarea parolei
                         .requestMatchers("/reset-password").permitAll()
-                        .requestMatchers("/gs-guide-websocket/**").permitAll()
+                        .requestMatchers("/gs-guide-websocket/**").permitAll() //se permite accesul pentru comunicare
                         .requestMatchers("/error").permitAll() //pentru validarea erorilor
                         .anyRequest().authenticated() //accesul pentru restul endpointurilor este blocat fara token
 
                 )
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Nu se foloseste JSESSIONID
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // se blochează JSESSIONID
                 )
                 // filtrul personalizat inaintea filtrului de autentificare standard
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

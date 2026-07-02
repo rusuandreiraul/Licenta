@@ -47,6 +47,7 @@ public class SleepService {
             LocalDate d1= LocalDate.parse(selectedDate);
             LocalDate d2=d1.minusDays(6);
             return sleepRepository.findSleepByDateRange(d2, d1, u.getUsername());
+
         }
         else{
             return new ArrayList<>();

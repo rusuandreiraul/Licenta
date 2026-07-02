@@ -26,8 +26,9 @@ public class AIController {
     }*/
 
     @PostMapping("/ai/chat")
-    public ResponseEntity<String> chat(@RequestBody String message){
-        return ResponseEntity.ok(aiService.processUserMessage(message));
+    public ResponseEntity<String> chat(@RequestBody String message, Authentication authentication){
+        String username=authentication.getName();
+        return ResponseEntity.ok(aiService.processUserMessage(message, username));
     }
 
 }

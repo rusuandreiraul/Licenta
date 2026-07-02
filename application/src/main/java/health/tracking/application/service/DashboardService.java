@@ -3,6 +3,7 @@ package health.tracking.application.service;
 import health.tracking.application.dto.AlimentationDTO;
 import health.tracking.application.dto.DashboardDailyDTO;
 import health.tracking.application.dto.DashboardWeekDTO;
+import health.tracking.application.dto.SleepDTO;
 import health.tracking.application.entities.Activity;
 import health.tracking.application.entities.Alimentation;
 import health.tracking.application.entities.Sleep;
@@ -94,17 +95,55 @@ public class DashboardService {
 
 
     public DashboardWeekDTO getWeekData(String username, String selectedDate) {
-        User u=userRepository.findByEmailOrUsername(username, username);
-        if(u!=null){
-            DashboardWeekDTO weekData=new DashboardWeekDTO();
-            LocalDate d=LocalDate.parse(selectedDate);
-            LocalDate startDate=d.minusDays(6);
-            List<Integer> calories=activityRepository.findCaloriesByUserAndDateRange(u, startDate, d);
-            List<Integer> qualitySleep=sleepRepository.findQualityByUserAndDateRange(u, startDate, d);
-            List<Integer> caloriesConsumed=alimentationRepository.findCaloriesByUserAndDateRange(u, startDate, d);
-            weekData.setCalories(calories);
-            weekData.setQualitySleep(qualitySleep);
-            weekData.setCaloriesConsumed(caloriesConsumed);
+        User u = userRepository.findByEmailOrUsername(username, username);
+        if (u != null) {
+            DashboardWeekDTO weekData = new DashboardWeekDTO();
+            LocalDate endDate = LocalDate.parse(selectedDate);
+            LocalDate startDate = endDate.minusDays(6);
+
+            // 1. Preluăm listele brute din baza de date pentru întreg intervalul
+            List<Activity> activities = activityRepository.findByUserAndDateRange(u, startDate, endDate);
+            List<SleepDTO> sleeps = sleepRepository.findSleepByDateRange(startDate, endDate, u.getUsername());
+            List<Alimentation> foods = alimentationRepository.findByUserAndDateRange(u, startDate, endDate);
+
+            // 2. Pregătim listele finale aliniate de exact 7 elemente
+            List<Integer> alignedCalories = new ArrayList<>();
+            List<Integer> alignedQualitySleep = new ArrayList<>();
+            List<Double> alignedCaloriesConsumed = new ArrayList<>();
+
+            // 3. Iterăm prin fiecare zi din interval (de la startDate la endDate)
+            // ATENȚIE: Mergem crescător (startDate -> endDate). Pe front-end avem deja .reverse() care le va întoarce cum ai vrut
+            for (LocalDate current = startDate; !current.isAfter(endDate); current = current.plusDays(1)) {
+                final LocalDate dateCursor = current;
+
+                // Aliniere Calorii Arse
+                int caloriesSum = activities.stream()
+                        .filter(a -> a.getActivityDate().equals(dateCursor)) // înlocuiește cu getter-ul tău de dată
+                        .mapToInt(Activity::getCalories)               // înlocuiește cu getter-ul tău de calorii
+                        .sum();
+                alignedCalories.add(caloriesSum);
+
+                // Aliniere Ore/Calitate Somn
+                int sleepVal = sleeps.stream()
+                        .filter(s -> s.getDateSleep().equals(dateCursor))
+                        .mapToInt(SleepDTO::getHoursSlept)
+                        .findFirst()
+                        .orElse(0);
+                alignedQualitySleep.add(sleepVal);
+
+                // Aliniere Calorii Consumate
+                double caloriesConsumedSum = foods.stream()
+                        .filter(f -> f.getMealDate().equals(dateCursor))
+                        .mapToDouble(Alimentation::getCalories)
+                        .sum();
+                alignedCaloriesConsumed.add(caloriesConsumedSum);
+            }
+
+            // 4. Setăm listele perfect structurate în DTO
+            weekData.setCalories(alignedCalories);
+            weekData.setQualitySleep(alignedQualitySleep);
+            weekData.setCaloriesConsumed(alignedCaloriesConsumed);
+
             return weekData;
         }
         return null;

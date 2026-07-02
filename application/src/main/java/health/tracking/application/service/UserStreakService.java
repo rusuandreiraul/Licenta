@@ -45,16 +45,15 @@ public class UserStreakService {
 
 
     public UserStreakResponseDTO addOrUpdateStreak(UserStreakRequestDTO dto) {
+        //extragere user1 si user2
         User u1=userRepository.findByEmailOrUsername(dto.getReceiver(), dto.getReceiver());
         User u2=userRepository.findByEmailOrUsername(dto.getSender(), dto.getSender());
-        System.out.println("DEBUG USER 1" + u1);
-        System.out.println("DEBUG USER 2" + u2);
         if(u1==null || u2==null){
             return null;
         }
 
-        UserStreak userStreak=userStreakRepository.findStreakBetweenUsers(u1,u2);
-        if(userStreak!=null){
+        UserStreak userStreak=userStreakRepository.findStreakBetweenUsers(u1,u2); //cautare streak existent
+        if(userStreak!=null){ //daca EXISTA
             if(bothCloseGoals(u1,u2, LocalDate.now()) && !userStreak.getLastStreakDate().equals(LocalDate.now())) {
                 userStreak.setStreakCount(userStreak.getStreakCount() + 1);
                 userStreak.setLastStreakDate(LocalDate.now());
@@ -62,6 +61,7 @@ public class UserStreakService {
                 return userStreakMapper.toDto(userStreak);
            }
         }
+        //daca NU EXISTA, se verifica completarea obiectivelor si se adauga in baza de date
         if(bothCloseGoals(u1,u2,LocalDate.now())) {
             UserStreak newStreak = new UserStreak();
             newStreak.setUserOne(u1);

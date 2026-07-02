@@ -28,4 +28,18 @@ public interface AlimentationRepository extends JpaRepository<Alimentation, Long
     ORDER BY a.mealDate ASC
 """)
     List<Integer> findCaloriesByUserAndDateRange(@Param("user") User u,@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate d);
+
+
+    @Query("""
+    SELECT al 
+    FROM Alimentation al
+    WHERE al.user = :user
+    AND al.mealDate BETWEEN :startDate AND :endDate
+    ORDER BY al.mealDate ASC
+""")
+    List<Alimentation> findByUserAndDateRange(
+            @Param("user") User u,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }

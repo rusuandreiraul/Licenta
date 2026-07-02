@@ -1,33 +1,31 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import Sidebar from "~/components/Sidebar.vue";
 import { useAuth } from "~/composable/useAuth";
 import { today, getLocalTimeZone } from "@internationalized/date";
 import DashboardCard from "~/components/dashboardCard.vue";
 import GoalsCard from "~/components/goalsCard.vue";
 import { useDateWeek } from "~/composable/useDateWeek";
-import {useGoals} from "~/composable/useGoals.js";
+import { useGoals } from "~/composable/useGoals.js";
 
 // User
-const { user,token } = useAuth();
+const { user, token } = useAuth();
 
-const username = computed(()=>user.value);
+const username = computed(() => user.value);
 
 const { getLastWeekDates } = useDateWeek();
 
 const userValue = ref({});
 
-
 const date = ref(today(getLocalTimeZone()));
 
 const week = ref(getLastWeekDates(date.value));
 
-const {dataGoals, getGoals} = useGoals();
+const { dataGoals, getGoals } = useGoals();
 
 definePageMeta({
   middleware: 'auth'
 });
-
 
 useSeoMeta({
   title: 'Dashboard Personal - Health Tracker',
@@ -35,7 +33,6 @@ useSeoMeta({
   ogTitle: 'Dashboard Personal - Health Tracker',
   ogDescription: 'Monitorizare inteligentă a stilului de viață.',
 });
-
 
 const activityData = ref({});
 const sleepData = ref({});
@@ -65,7 +62,7 @@ const chartOptionsBar = ref({
     type: "bar",
     height: 320,
     toolbar: { show: false },
-    animations:{
+    animations: {
       enabled: false,
     }
   },
@@ -81,28 +78,27 @@ const chartOptionsBar = ref({
   dataLabels: { enabled: false },
   stroke: { show: true, width: 2, colors: ["transparent"] },
   xaxis: {
-    categories: week.value.reverse(),
+    categories: [...week.value],
     labels: { style: { colors: "#374151", fontSize: "12px" } },
   },
   yaxis: [
     {
-      // Axa 1 (Stânga) - Va gestiona scara mare pentru toate caloriile
-      seriesName: "Exercise Calories",
+      seriesName: "Calorii arse",
       title: { text: "Calorii (Arse / Consumate)", style: { color: "#3b82f6" } },
       labels: { style: { colors: "#374151" } }
     },
     {
-      // Axa 2 (Dreapta) - scara mai mica pentru valorile somnului
-      seriesName: "Sleep",
+
+      seriesName: "Durata somnului",
       opposite: true,
-      max: 5,
+      max: 12,
       min: 0,
-      title: { text: "Calitate Somn (0 - 5)", style: { color: "#8b5cf6" } },
+      title: { text: "Durata somnului (Ore)", style: { color: "#8b5cf6" } },
       labels: { style: { colors: "#8b5cf6" } }
     },
     {
-      // Axa 3 - O forțăm să folosească IDENTIC scara primei axe
-      seriesName: "Exercise Calories",
+      // CORECTURĂ: Mapare exactă pe seria[2] -> "Calorii consumate" (forțată pe aceeași scară cu axa stângă)
+      seriesName: "Calorii arse",
       show: false
     }
   ],
@@ -115,9 +111,12 @@ const chartOptionsBar = ref({
 });
 
 const chartOptionsRadial = ref({
-  chart: { height: 300, width: 200, type: "radialBar", animations:{
-      enabled: false,
-    } },
+  chart: {
+    height: 300,
+    width: 200,
+    type: "radialBar",
+    animations: { enabled: false }
+  },
   colors: chartColors,
   plotOptions: {
     radialBar: {
@@ -170,10 +169,8 @@ async function fetchUser() {
 
 async function fetchChanges() {
   const formData = new FormData();
-
   formData.append("height", userValue.value.height);
   formData.append("weight", userValue.value.weight);
-
 
   if (selectedFile.value) {
     formData.append("profileImage", selectedFile.value);
@@ -181,17 +178,17 @@ async function fetchChanges() {
 
   try {
     const response = await fetch(
-      `http://localhost:8080/user-change`,
-      {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token.value}`,
-        },
-        body: formData,
-      }
+        `http://localhost:8080/user-change`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token.value}`,
+          },
+          body: formData,
+        }
     );
     if (response.ok) {
-      const data=await response.json();
+      const data = await response.json();
       userValue.value = data;
       console.log("user modificat ", userValue.value);
     }
@@ -200,19 +197,18 @@ async function fetchChanges() {
   }
 }
 
-
 async function fetchWeekData() {
   const selectedDate = formatDate(date.value);
   try {
     const response = await fetch(
-      `http://localhost:8080/dashboard-week/${selectedDate}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token.value}`,
+        `http://localhost:8080/dashboard-week/${selectedDate}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token.value}`,
+          }
         }
-      }
     );
 
     if (response.ok) {
@@ -231,14 +227,14 @@ async function fetchDailyData() {
   const selectedDate = formatDate(date.value);
   try {
     const response = await fetch(
-      `http://localhost:8080/dashboard-daily/${selectedDate}`,
-      {
-        method: "GET",
-        headers:{
-          "Content-Type": "application/json",
-          'Authorization': `Bearer ${token.value}`,
+        `http://localhost:8080/dashboard-daily/${selectedDate}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            'Authorization': `Bearer ${token.value}`,
+          }
         }
-      }
     );
     if (response.ok) {
       const data = await response.json();
@@ -255,21 +251,13 @@ async function fetchDailyData() {
         },
       };
 
-      const activitySerial = Math.min(
-        100,
-        (data.totalActivityDuration / dataGoals.value[0].targetValue) * 100
-      );
+      const activityTarget = dataGoals.value?.[0]?.targetValue || 1;
+      const sleepTarget = dataGoals.value?.[1]?.targetValue || 1;
+      const foodTarget = dataGoals.value?.[2]?.targetValue || 1;
 
-      console.log(activitySerial);
-      const sleepSerial = Math.min(
-        100,
-        (data.totalHoursSleep / dataGoals.value[1].targetValue) * 100
-      );
-
-      const alimetationSerial = Math.min(
-        100,
-        (data.totalCaloriesConsumed / dataGoals.value[2].targetValue) * 100
-      );
+      const activitySerial = Math.min(100, (data.totalActivityDuration / activityTarget) * 100);
+      const sleepSerial = Math.min(100, (data.totalHoursSleep / sleepTarget) * 100);
+      const alimetationSerial = Math.min(100, (data.totalCaloriesConsumed / foodTarget) * 100);
 
       seriesRadial.value = [
         activitySerial || 0,
@@ -283,7 +271,6 @@ async function fetchDailyData() {
 }
 
 async function refreshFetch() {
-  // Lansează toate cele 3 cereri HTTP în paralel pentru a reduce latența backend-ului
   try {
     await Promise.all([
       fetchUser(),
@@ -297,17 +284,17 @@ async function refreshFetch() {
 
 watch(date, (newDate) => {
   week.value = getLastWeekDates(newDate);
-  chartOptionsBar.value.xaxis.categories = week.value.reverse();
+  // CORECTURĂ: Folosim clonarea cu operatorul spread ca să nu modificăm direct variabila reactivă week
+  chartOptionsBar.value.xaxis.categories = [...week.value]
   fetchDailyData();
   fetchWeekData();
 });
 
-onMounted(async() => {
+onMounted(async () => {
   await getGoals();
   refreshFetch();
 });
 </script>
-
 <template>
   <div
     class="min-h-screen w-full flex bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 relative"

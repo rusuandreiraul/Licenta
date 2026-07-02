@@ -74,22 +74,45 @@ public class AIService {
         return chatModel.call(prompt).getResult().getOutput().getContent();
     }*/
 
-    public String processUserMessage(String message){
-        // 1. se defineste regula de comportament si formatare a sistemului
-        SystemMessage systemMessage = new SystemMessage("""
-        Ești un asistent de sănătate. 
+    public String processUserMessage(String message, String username){
+        //1. se preaia prima zi
+        LocalDate threeDaysAgo = LocalDate.now().minusDays(3);
+
+        User user=userRepository.findByEmailOrUsername(username,username);
+
+        //2. se genereaza un raport cu datele utilizatorului pe ultimele 3 zile
+        List<Activity> activities = activityRepository.findAllByUserAndActivityDateAfter(user, threeDaysAgo);
+        List<Sleep> sleepRecords = sleepRepository.findAllByUserAndDateSleepAfter(user, threeDaysAgo);
+        List<Alimentation> nutrition = alimentationRepository.findAllByUserAndMealDateAfter(user, threeDaysAgo);
+
+        //3. se creaza template-ul pe care modelul AI il va urma
+        String template = """
+        Ești un asistent virtual de sănătate pentru utilizatorul {username}.
+        Datele din ultimele 3 zile sunt: {stats}.
+        Întrebarea mea este: {message}.
+        
+        Cerințe:
+        1. Analizează progresul utilizatorului și datele sale.
+        2. Raspunde la întrebarea pe care a pus-o utilizatorul pe baza datelor sale.
         REGULĂ STRICTĂ: Răspunde DOAR în text simplu. 
         NU folosi deloc steluțe (**), diezi (###) sau alte marcaje Markdown. 
         Mapează listele doar cu cifre (1, 2, 3) și separă ideile prin rânduri noi.
-    """);
+        """;
 
-        // 2. Mesajul primit efectiv de la utilizator din frontend
-        UserMessage userRequest = new UserMessage(message);
+        //4. se introduc variabilele dinamice in prompt
+        String stats=String.format("Activitati: %s; Somn: %s; Alimentatie: %s", activities.toString(), sleepRecords.toString(), nutrition.toString());
+        PromptTemplate promptTemplate=new PromptTemplate(template);
+        Prompt prompt=promptTemplate.create(Map.of(
+                "message", message,
+                "username",username,
+                "stats", stats
+        ));
 
-        // 3. ambele mesaje (de sistem si din partea utilizatorului) se pun in prompt si se face apelul
-        Prompt prompt = new Prompt(List.of(systemMessage, userRequest));
+        //5. se genereaza apelul cu promptul
         return chatModel.call(prompt).getResult().getOutput().getContent();
     }
+
+
 
 
 }

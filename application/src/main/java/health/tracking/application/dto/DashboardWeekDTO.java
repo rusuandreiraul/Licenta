@@ -14,5 +14,5 @@ import java.util.List;
 public class DashboardWeekDTO {
     List<Integer> calories;
     List<Integer>qualitySleep;
-    List<Integer> caloriesConsumed;
+    List<Double> caloriesConsumed;
 }

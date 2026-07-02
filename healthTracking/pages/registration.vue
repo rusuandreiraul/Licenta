@@ -185,18 +185,16 @@ onMounted(()=>{
           />
         </div>
 
-        <!-- Buton -->
         <button
           type="submit"
-          class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2.5 rounded-lg transition"
+          class="w-full bg-green-700 hover:bg-green-800 text-white font-medium py-2.5 rounded-lg transition"
         >
           Creează cont
         </button>
 
-        <!-- Link spre login -->
         <p class="text-center text-sm mt-4 text-gray-600 dark:text-gray-400">
           Ai deja un cont?
-          <NuxtLink to="/" class="text-green-500 hover:underline">
+          <NuxtLink to="/" class="text-green-700 hover:underline">
             Autentifică-te
           </NuxtLink>
         </p>

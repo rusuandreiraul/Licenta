@@ -64,7 +64,13 @@ public class PostService {
         if(u==null){
             return new ArrayList<>();
         }
+        List<PostResponseDTO> listFinal=new ArrayList<>();
         List<Post> postList=postRepository.findAllByUser(u);
-        return postList.stream().map(post->postMapper.toDto(post)).toList();
+        for(Post p: postList){
+            PostResponseDTO post=postMapper.toDto(p);
+            post.setUrlImage(p.getUser().getUrlProfileImage());
+            listFinal.add(post);
+        }
+        return listFinal;
     }
 }

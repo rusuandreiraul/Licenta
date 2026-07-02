@@ -58,5 +58,17 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
     List<Activity> findAllByUserAndActivityDateAfter(User user, LocalDate threeDaysAgo);
 
 
+    @Query("""
+    SELECT a 
+    FROM Activity a
+    WHERE a.user = :user
+    AND a.activityDate BETWEEN :startDate AND :endDate
+    ORDER BY a.activityDate ASC
+""")
+    List<Activity> findByUserAndDateRange(
+            @Param("user") User u,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }
 

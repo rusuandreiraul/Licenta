@@ -14,8 +14,7 @@ import { useAuth } from "~/composable/useAuth";
 import QualitySleep from "~/components/qualitySleep.vue";
 import Chatbot from "~/components/chatbot.vue";
 
-const { user,token } = useAuth();
-
+const { user, token } = useAuth();
 const { getLastWeekDates } = useDateWeek();
 
 const df = new DateFormatter("en-US", {
@@ -24,7 +23,6 @@ const df = new DateFormatter("en-US", {
 
 const selectedId = ref(null);
 const showModal = ref(false);
-
 
 function openModal(id) {
   selectedId.value = id;
@@ -46,7 +44,7 @@ const lastHoursSlept = ref(0); // Adăugat pentru a arăta și ultima durată
 const lastStress = ref(0);
 const lastMorningEnergy = ref(0);
 
-const sleepDataByDate=ref();
+const sleepDataByDate = ref();
 
 const modelValueDate = ref(today(getLocalTimeZone()));
 const week = ref(getLastWeekDates(modelValueDate.value));
@@ -90,7 +88,8 @@ const chartOptions = ref({
     style: { fontSize: "16px", fontWeight: "bold" },
   },
   xaxis: {
-    categories: Object.values(week.value),
+    // Generăm o copie inversată locală izolată pentru axa X inițială (14.06 -> 08.06)
+    categories: [...Object.values(week.value)].reverse(),
     labels: {
       style: {
         colors: "#6B7280", // Text mai puțin intens
@@ -105,7 +104,6 @@ const chartOptions = ref({
   },
 });
 
-// --- FUNCȚII ASINCRONE (Fetch) ---
 async function fetchSleepByDateRange() {
   if (!token.value) return;
 
@@ -122,6 +120,7 @@ async function fetchSleepByDateRange() {
 
     if (response.ok) {
       const dataSleep = await response.json();
+      console.log("data week sleep", dataSleep);
 
       if (!dataSleep || dataSleep.length === 0) {
         resetSleepData();
@@ -137,16 +136,17 @@ async function fetchSleepByDateRange() {
       const sumHours = validHours.reduce((acc, hours) => acc + hours, 0);
       avgHoursSlept.value = validHours.length ? (sumHours / validHours.length).toFixed(1) : 0;
 
-      // 2. Transformăm obiectul săptămânii într-un array curat: ['2026-06-08', '2026-06-09', ...]
-      const daysArray = Object.values(week.value);
+      // 2. Facem o copie superficială izolată a zilelor în ordine inversă (14.06 -> 08.06)
+      const daysArray = [...Object.values(week.value)].reverse();
 
-      // 3. Aliniem orele de somn cu acest array
+      // 3. Aliniem orele de somn cu acest array izolat
       const alignedHoursData = daysArray.map((dateStr) => {
         const targetDate = dateStr.toString().trim();
 
         const matchingDay = dataSleep.find((s) => {
-          if (!s.date) return false;
-          const backendDate = s.date.toString().split('T')[0].trim();
+          // CORECTURĂ: Citim proprietatea corectă din backend (dateSleep)
+          if (!s.dateSleep) return false;
+          const backendDate = s.dateSleep.toString().split('T')[0].trim();
           return backendDate === targetDate;
         });
 
@@ -197,35 +197,35 @@ async function fetchSleepByDate(){
   }
   catch(e){
     console.error("Eroare la preluarea datelor de somn:", e);
-    }
+  }
 }
 
 async function deleteSleep(){
-try {
-  const response = await fetch(`http://localhost:8080/delete-sleep/${selectedId.value}`, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token.value}`
+  try {
+    const response = await fetch(`http://localhost:8080/delete-sleep/${selectedId.value}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.value}`
+      }
+    });
+    if (response.ok) {
+      alert("Datele despre somn din data selectata au fost sterse cu success");
+      showModal.value=false;
+      sleepDataByDate.value = null;
+      fetchSleepByDate();
+      fetchSleepByDateRange();
     }
-  });
-  if (response.ok) {
-    alert("Datele despre somn din data selectata au fost sterse cu success");
-    showModal.value=false;
-    sleepDataByDate.value = null;
-    fetchSleepByDate();
-    fetchSleepByDateRange();
+  }
+  catch(e){
+    console.error("Eroare la stergere datelor de somn:", e);
   }
 }
-catch(e){
-  console.error("Eroare la stergere datelor de somn:", e);
-}
-}
 
-// --- HOOKS și WATCHERS ---
 watch(modelValueDate, (newDate) => {
   week.value = getLastWeekDates(newDate);
-  chartOptions.value.xaxis.categories = Object.values(week.value);
+  // CORECTURĂ: Folosim operatorul spread pentru a clona, evitând modificarea directă a lui week.value
+  chartOptions.value.xaxis.categories = [...Object.values(week.value)].reverse();
   fetchSleepByDateRange();
   fetchSleepByDate();
 });

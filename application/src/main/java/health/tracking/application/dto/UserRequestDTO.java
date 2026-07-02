@@ -26,7 +26,7 @@ public class UserRequestDTO {
     private String password;
     @Positive(message = "Inalțimea trebuie să fie pozitivă")
     private double height;
-    @Positive
+    @Positive(message = "Greutatea trebuie să fie pozitivă")
     private double weight;
     private MultipartFile profileImage;
     @PastOrPresent(message = "Data nașterii nu poate fi în viitor")

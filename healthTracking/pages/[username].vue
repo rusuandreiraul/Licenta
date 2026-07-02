@@ -4,11 +4,15 @@ import { useAuth } from "~/composable/useAuth";
 const route = useRoute();
 const username = route.params.username;
 
-const { token } = useAuth();
+const { token, user } = useAuth();
+
+const loggedUser = user.value;
 
 const isChatOpen = ref(false);
 
 const isFollowed = ref(false);
+
+const selectedUser=ref(null);
 
 const posts = ref([]);
 
@@ -75,9 +79,29 @@ async function getPosts() {
   }
 }
 
+async function getUser() {
+  try {
+    const response = await fetch(`http://localhost:8080/search-user/${username}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token.value}`
+          }
+        }
+    );
+
+    if (response.ok) {
+      selectedUser.value = await response.json();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 onMounted(() => {
   checkFollow();
   getPosts();
+  getUser();
 });
 </script>
 
@@ -92,8 +116,8 @@ onMounted(() => {
 
       <div class="flex flex-col items-center text-center gap-3">
         <img
-          class="w-24 h-24 rounded-full border-2 border-indigo-500 object-cover"
-          src="https://via.placeholder.com/150"
+          class="w-24 h-24 rounded-full border-2 border-green-500 object-cover"
+          :src="selectedUser?.urlProfileImage"
           alt="Avatar user"
         />
         <div>
@@ -122,17 +146,19 @@ onMounted(() => {
 
       <div class="hidden md:block"></div>
     </div>
-
-    <div class="p-10 mt-5 border border-gray-100 shadow-xl w-full">
-      <h1 class="font-bold">Feed</h1>
-      <friendCard
-        v-for="p in posts"
-        :key="p.id"
-        :username="p.username"
-        :content="p.content"
-        :urlImage="p.urlImage"
-        :createDate="p.publishDate"
-      />
+    <div class="p-5 md:p-10 mt-5 border border-gray-100 shadow-xl w-full">
+      <h1 class="font-bold text-xl mb-5">Feed</h1>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <friendCard
+            v-for="p in posts"
+            :key="p.id"
+            :username="p.username"
+            :content="p.content"
+            :urlImage="p.urlImage"
+            :createDate="p.publishDate"
+            class="w-full aspect-square border border-gray-200 rounded-lg overflow-hidden"
+        />
+      </div>
     </div>
   </div>
 </template>

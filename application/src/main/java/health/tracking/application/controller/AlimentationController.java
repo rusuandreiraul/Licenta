@@ -41,8 +41,6 @@ public class AlimentationController {
     @GetMapping("/products/search")
     public ResponseEntity<?> searchProduct(@RequestParam String query) {
 
-
-        System.out.println(">>> VALOAREA PRIMITĂ DIN FRONTEND ESTE: '" + query + "'");
         String myUserAgent = "WellSyncAppV2 - Testing Environment - Contact: andreiraul.rusu@gmail.com";
 
         // Validare rapidă ca să nu trimitem cereri inutile cu text gol

@@ -17,9 +17,9 @@ import java.time.LocalDateTime;
 public class ActivityDTO {
     private Long id;
     private String activityType;
-    @Positive(message = "Durata trebuie sa fie pozitiva")
+    @Positive(message = "Durata trebuie sa fie pozitivă")
     private int duration;
-    @PastOrPresent(message = "Data nu poate fi in viitor")
+    @PastOrPresent(message = "Data nu poate fi în viitor")
     private LocalDate activityDate;
     @Positive(message = "Caloriile nu pot fi negative")
     private int calories;
