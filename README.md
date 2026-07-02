@@ -26,7 +26,7 @@ Aplicația este construită respectând bunele practici de decuplare a component
 
 ### Frontend (Componenta Client)
 
-- **Framework:** Nuxt.js 3 (bazat naiv pe Vue.js 3 și motorul de randare Nitro)
+- **Framework:** Nuxt.js 3 (bazat nativ pe Vue.js 3 și motorul de randare Nitro)
 - **Stil:** Tailwind CSS / Nuxt UI Component Toolkit
 - **Grafice interactive:** ApexCharts (randate exclusiv pe partea de client via `<client-only>`)
 
