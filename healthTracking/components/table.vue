@@ -87,15 +87,19 @@ async function deleteActivity() {
             {{ row[col]}}
           </td>
           <td>
-            <UModal v-model="showModal">
+            <UModal v-model="showModal"
+                    title="Confirmă ștergerea"
+                    :close="{
+                            color: 'primary',
+                            variant: 'outline',
+                            class: 'rounded-full'
+                              }">
               <UButton label="Sterge" color="error" @click="openModal(row.id)"/>
-              <template #content>
+              <template #body>
               <div class="p-4">
                 <p>Sigur vrei să ștergi această activitate?</p>
                 <div class="flex gap-3 justify-end mt-4">
-                  <button @click="showModal = false" class="px-4 py-2 bg-gray-300 rounded">
-                    Anulează
-                  </button>
+
 
                   <button @click="deleteActivity" class="px-4 py-2 bg-red-500 hover:translate-1 text-white rounded">
                     Șterge

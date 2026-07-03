@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import Sidebar from "~/components/Sidebar.vue";
 import {
   DateFormatter,
@@ -10,7 +10,6 @@ import { useDateWeek } from "~/composable/useDateWeek";
 import { useAuth } from "~/composable/useAuth";
 import { useGoals } from "~/composable/useGoals";
 import AlimentationCard from "~/components/alimentationCard.vue";
-import { isEmpty } from "@nuxt/ui/runtime/utils/index.js";
 
 const { user } = useAuth();
 
@@ -107,6 +106,7 @@ async function fetchAlimentationByDate() {
   );
   if (response.ok) {
     receivedData.value = await response.json();
+    console.log("alimentare zi", receivedData);
     allCalories.value = 0;
     allFat.value = 0;
     allCarbos.value = 0;
@@ -122,7 +122,7 @@ async function fetchAlimentationByDate() {
       allCarbos.value += parseFloat(item.carbohydrates) || 0;
       allProteins.value += Number(item.proteins) || 0;
 
-      if (item.type === "Mic Dejun") {
+      if (item.type === "Mic dejun") {
         breakfast.value.push(item);
       } else if (item.type === "Pranz") {
         lunch.value.push(item);
@@ -161,6 +161,17 @@ const progressPercent = computed(() => {
   const percent = (allCalories.value / caloriesGoal.value) * 100;
   return Math.min(percent, 100);
 });
+
+// Computed property dedicat pentru a rezolva reactivitatea meselor în interfață
+const meals = computed(() => [
+  { title: 'Mic dejun', data: breakfast.value, img: '/micdejun.jpeg', color: 'emerald', rec: '400-600' },
+  { title: 'Pranz', data: lunch.value, img: '/pranz.jpg', color: 'orange', rec: '600-800' },
+  { title: 'Cina', data: dinner.value, img: '/cina.jpeg', color: 'indigo', rec: '300-500' }
+]);
+
+onMounted(async () => {
+  await fetchAlimentationByDate();
+})
 </script>
 
 <template>
@@ -170,15 +181,15 @@ const progressPercent = computed(() => {
     <main class="flex-1 p-4 sm:pl-72 flex gap-4">
       <div class="flex-1 flex flex-col gap-4">
         <div
-          class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-100"
+            class="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-100"
         >
           <div class="flex gap-4 items-center">
             <UPopover>
               <UButton color="gray" variant="solid" icon="i-lucide-calendar">
                 {{
                   modelValueDate
-                    ? df.format(modelValueDate.toDate(getLocalTimeZone()))
-                    : "Selectează o dată"
+                      ? df.format(modelValueDate.toDate(getLocalTimeZone()))
+                      : "Selectează o dată"
                 }}
               </UButton>
               <template #content>
@@ -195,9 +206,10 @@ const progressPercent = computed(() => {
               Înregistrează o activitate:
             </p>
             <AddModal
-              type="alimentation"
-              :user="user"
-              :date="modelValueDate.toString()"
+                type="Adăugare produs"
+                :user="user"
+                :date="modelValueDate.toString()"
+                @success="fetchAlimentationByDate"
             />
           </div>
         </div>
@@ -205,30 +217,30 @@ const progressPercent = computed(() => {
         <div class="grid grid-cols-4 p-3 gap-2">
           <div>
             <AlimentationCard
-              title="Calorii"
-              :icon="icons.calories"
-              :content="allCalories.toString()"
+                title="Calorii"
+                :icon="icons.calories"
+                :content="allCalories.toString()"
             />
           </div>
           <div>
             <AlimentationCard
-              title="Proteine"
-              :icon="icons.proteins"
-              :content="allProteins.toString() + 'g'"
+                title="Proteine"
+                :icon="icons.proteins"
+                :content="allProteins.toString() + 'g'"
             />
           </div>
           <div>
             <AlimentationCard
-              title="Grăsimi"
-              :icon="icons.fat"
-              :content="allFat.toFixed(1) + 'g'"
+                title="Grăsimi"
+                :icon="icons.fat"
+                :content="allFat.toFixed(1) + 'g'"
             />
           </div>
           <div>
             <AlimentationCard
-              title="Carbohidrați"
-              :icon="icons.carbos"
-              :content="allCarbos.toFixed(1) + 'g'"
+                title="Carbohidrați"
+                :icon="icons.carbos"
+                :content="allCarbos.toFixed(1) + 'g'"
             />
           </div>
         </div>
@@ -244,11 +256,7 @@ const progressPercent = computed(() => {
 
         <div class="grid grid-cols-1 gap-6 p-2">
 
-          <div v-for="meal in [
-            { title: 'Mic Dejun', data: breakfast, img: '/micdejun.jpeg', color: 'emerald', rec: '400-600' },
-            { title: 'Prânz', data: lunch, img: '/pranz.jpg', color: 'orange', rec: '600-800' },
-            { title: 'Cină', data: dinner, img: '/cina.jpeg', color: 'indigo', rec: '300-500' }
-          ]" :key="meal.title"
+          <div v-for="meal in meals" :key="meal.title"
                class="group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 flex h-40">
 
             <div class="relative w-1/3 overflow-hidden">
@@ -262,7 +270,7 @@ const progressPercent = computed(() => {
               <div class="flex justify-between items-start">
                 <div>
                   <span :class="`text-${meal.color}-500 text-xs font-bold uppercase tracking-widest`">Status</span>
-                  <div v-if="isEmpty(meal.data)" class="text-gray-400 italic text-sm mt-1">
+                  <div v-if="meal.data.length === 0" class="text-gray-400 italic text-sm mt-1">
                     Nicio înregistrare încă
                   </div>
                   <div v-else class="flex flex-wrap gap-2 mt-2">
@@ -270,7 +278,8 @@ const progressPercent = computed(() => {
                           class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold border border-gray-200 shadow-sm flex items-center gap-1">
                       {{ item.nameProduct }}
                       <UModal
-                          title="Confirmè stergerea"
+                          v-model="showModal"
+                          title="Confirmă stergerea"
                           :close="{
                             color: 'primary',
                             variant: 'outline',
@@ -281,13 +290,13 @@ const progressPercent = computed(() => {
                       </button>
                         <template #body>
                           <div class="p-4">
-                        <p>Sigur vrei să ștergi această activitate?</p>
+                        <p>Sigur vrei să ștergi aceast aliment?</p>
                         <div class="flex gap-3 justify-end mt-4">
                         <button @click="showModal = false" class="px-4 py-2 bg-gray-300 rounded">
                           Anulează
                         </button>
 
-                      <button @click="deleteAlimentation" class="px-4 py-2 bg-red-500 hover: translate-1 text-white rounded">
+                      <button @click="deleteAlimentation" class="px-4 py-2 bg-red-500 hover:translate-x-1 text-white rounded">
                          Șterge
                       </button>
                    </div>
@@ -320,7 +329,7 @@ const progressPercent = computed(() => {
         </div>
       </div>
       <div
-        class="hidden md:flex flex-col w-[350px] bg-gray-200 p-4 rounded-lg sticky top-0 h-screen"
+          class="hidden md:flex flex-col w-[350px] bg-gray-200 p-4 rounded-lg sticky top-0 h-screen"
       >
         <h2 class="text-gray-700 font-bold mb-2">Asistent AI</h2>
         <div class="h-full bg-white rounded-lg">
@@ -328,7 +337,6 @@ const progressPercent = computed(() => {
         </div>
       </div>
 
-      <!-- Mobile bubble AI -->
       <div class="fixed bottom-4 right-4 md:hidden">
         <AddModal type="AI" :user="user" :date="modelValueDate" />
       </div>

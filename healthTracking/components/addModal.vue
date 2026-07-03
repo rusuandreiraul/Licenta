@@ -14,7 +14,6 @@ const {token}=useAuth();
 const items = ref(["Mic dejun", "Pranz", "Cina"]);
 
 const exerciseOptions = [
-  // Cele inițiale corectate/păstrate
   "Alergare",
   "Antrenament de mare intensitate (HIIT)",
   "Mers pe jos",
@@ -66,21 +65,21 @@ const selectedProduct = ref({
   name: "",
 });
 
+const emit = defineEmits(["success"]);
+
 async function fetchSearch() {
   if (!form.value.name) return;
 
   isSearching.value = true;
-  productsFound.value = []; // Resetăm lista înainte de căutare
+  productsFound.value = [];
 
   try {
-
     const response = await fetch(`http://localhost:8080/products/search?query=${encodeURIComponent(form.value.name)}`,
         {
           method: "GET",
           headers: {
             'Authorization': `Bearer ${token.value}`,
             'Content-Type': "application/json",
-
           }
         }
     );
@@ -105,19 +104,14 @@ async function fetchSearch() {
   }
 }
 
-
-
 function selectProduct(p) {
-  // 1. Salvăm produsul selectat (folosind denumirea corectă din OpenFoodFacts)
   selectedProduct.value = {
     name: p.product_name_ro || p.product_name || 'Produs fără nume',
     brands: p.brands || 'Brand necunoscut'
   };
 
-  // 2. Mapăm automat datele în obiectul tău 'form' ca să plece corect spre backend
   form.value.name = p.product_name_ro || p.product_name || 'Produs fără nume';
 
-  // OpenFoodFacts trimite nutrienții în obiectul 'nutriments' la 100g
   if (p.nutriments) {
     form.value.caloriesMeal = Math.round(p.nutriments['energy-kcal_100g'] || p.nutriments['energy-kcal'] || 0);
     form.value.proteins = p.nutriments.proteins_100g || p.nutriments.proteins || 0;
@@ -125,7 +119,6 @@ function selectProduct(p) {
     form.value.fat = p.nutriments.fat_100g || p.nutriments.fat || 0;
   }
 
-  // 3. Resetăm lista pentru a ascunde dropdown-ul de sugestii
   productsFound.value = [];
 }
 
@@ -160,7 +153,7 @@ async function handleSubmit() {
       type: form.value.type,
       fat: form.value.fat,
       proteins: form.value.proteins,
-      productName: form.value.name,
+      nameProduct: form.value.name,
     };
   }
 
@@ -169,13 +162,14 @@ async function handleSubmit() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        'Authorization': `Bearer ${token.value}` //luam tokenul
+        'Authorization': `Bearer ${token.value}`
       },
       body: JSON.stringify(body),
     });
 
     if (res.ok) {
       alert("Datele au fost adăugate cu succes!");
+      emit("success");
       form.value = {
         calories: "",
         duration: "",
@@ -190,7 +184,7 @@ async function handleSubmit() {
         proteins: 0,
         carbohydrates: "",
         name: "",
-      }; // resetează form-ul
+      };
     } else {
       alert("Eroare la trimiterea datelor!");
     }
@@ -202,176 +196,189 @@ async function handleSubmit() {
 
 <template>
   <UModal
-    :title="props.type"
-    :close="{
+      :title="props.type"
+      :close="{
       color: 'primary',
       variant: 'outline',
       class: 'rounded-full',
     }"
+      ui="{ width: 'sm:max-w-md' }"
   >
-    <!-- Buton de deschidere modal -->
-    <UButton label="+" color="neutral" variant="subtle" />
+    <UButton label="+" color="neutral" variant="subtle" class="shadow-sm" />
 
-    <!-- BODY FORM -->
     <template #body>
-      <!-- Activity -->
       <form
-        v-if="props.type === 'Adăugare activitate'"
-        @submit.prevent="handleSubmit"
-        class="space-y-4"
+          v-if="props.type === 'Adăugare activitate'"
+          @submit.prevent="handleSubmit"
+          class="space-y-5 p-1"
       >
-        <div>
-          <label>Calorii</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide uppercase">Calorii consumate</label>
           <input
-            type="number"
-            v-model="form.calories"
-            placeholder="Calorii"
-            class="w-full border rounded px-3 py-2"
+              type="number"
+              v-model="form.calories"
+              placeholder="Ex: 350 kcal"
+              class="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all rounded-xl px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none"
           />
         </div>
-        <div>
-          <label>Durată (min.)</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide uppercase">Durată activitate</label>
           <input
-            type="text"
-            v-model="form.duration"
-            min="0"
-            placeholder="Durată (ex: 45 min)"
-            class="w-full border rounded px-3 py-2"
+              type="text"
+              v-model="form.duration"
+              min="0"
+              placeholder="Ex: 45 min"
+              class="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all rounded-xl px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none"
           />
         </div>
-        <div>
-          <label>Tip exercițiu</label>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide uppercase">Tip exercițiu</label>
           <select
-            v-model="form.exerciseType"
-            class="w-full border rounded px-3 py-2"
+              v-model="form.exerciseType"
+              class="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all rounded-xl px-3.5 py-2.5 text-sm text-gray-800 outline-none appearance-none cursor-pointer"
           >
-            <option disabled value="">Selectează tipul</option>
+            <option disabled value="">Alege tipul de activitate</option>
             <option
-              v-for="option in exerciseOptions"
-              :key="option"
-              :value="option"
+                v-for="option in exerciseOptions"
+                :key="option"
+                :value="option"
             >
               {{ option }}
             </option>
           </select>
         </div>
-        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">
-          Adaugă
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.99] text-white font-medium text-sm px-4 py-3 rounded-xl shadow-sm shadow-emerald-100 transition-all mt-2">
+          Salvează activitatea
         </button>
       </form>
 
-      <!-- Sleep -->
       <form
-        v-else-if="props.type === 'sleep'"
-        @submit.prevent="handleSubmit"
-        class="space-y-4"
-      >
-        <div>
-          <label>Calitatea somnului</label>
-          <input
-            type="number"
-            min="1"
-            max="5"
-            v-model="form.quality"
-            placeholder="1-slab / 5-perfect"
-            class="w-full border rounded px-3 py-2"
-          />
-        </div>
-        <div>
-          <label>Ora Dormite</label>
-          <input
-            type="number"
-            placeholder="Ex: 8 ore, 6 ore..."
-            v-model="form.hoursSlept"
-            class="w-full border rounded px-3 py-2"
-          />
-        </div>
-        <div>
-          <label>Energie Dimineața</label>
-          <input
-              type="number"
-              placeholder="Între 0 și 5"
-              v-model="form.morningEnergy"
-              max="5"
-              min="0"
-              class="w-full border rounded px-3 py-2"
-          />
-        </div>
-        <div>
-          <label>Stress</label>
-          <input
-              type="number"
-              placeholder="Între 0 și 5"
-              v-model="form.stress"
-              max="5"
-              min="0"
-              class="w-full border rounded px-3 py-2"
-          />
-        </div>
-
-        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">
-          Adaugă
-        </button>
-      </form>
-
-      <!-- Alimentation -->
-      <form
-          v-else-if="props.type === 'alimentation'"
+          v-else-if="props.type === 'Adăugare sesiune de somn'"
           @submit.prevent="handleSubmit"
-          class="space-y-4"
+          class="space-y-5 p-1"
       >
-        <div>
-          <label>Tip masă</label>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-gray-600 tracking-wide uppercase">Calitate (1-5)</label>
+            <input
+                type="number"
+                min="1"
+                max="5"
+                v-model="form.quality"
+                placeholder="1 (slab) - 5 (excelent)"
+                class="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all rounded-xl px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-gray-600 tracking-wide uppercase">Ore dormite</label>
+            <input
+                type="number"
+                placeholder="Ex: 7.5 ore"
+                v-model="form.hoursSlept"
+                class="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all rounded-xl px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none"
+            />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-gray-600 tracking-wide uppercase">Energie dimineața</label>
+            <input
+                type="number"
+                placeholder="Nivel 0 - 5"
+                v-model="form.morningEnergy"
+                max="5"
+                min="0"
+                class="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all rounded-xl px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none"
+            />
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-semibold text-gray-600 tracking-wide uppercase">Nivel stres</label>
+            <input
+                type="number"
+                placeholder="Nivel 0 - 5"
+                v-model="form.stress"
+                max="5"
+                min="0"
+                class="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all rounded-xl px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none"
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.99] text-white font-medium text-sm px-4 py-3 rounded-xl shadow-sm shadow-emerald-100 transition-all mt-2">
+          Înregistrează somnul
+        </button>
+      </form>
+
+      <form
+          v-else-if="props.type === 'Adăugare produs'"
+          @submit.prevent="handleSubmit"
+          class="space-y-5 p-1"
+      >
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide uppercase">Tip masă</label>
           <USelectMenu
               v-model="form.type"
               :items="items"
-              class="w-full border rounded px-3 py-2"
+              class="w-full shadow-2xs"
+              ui="{ rounded: 'rounded-xl', padding: 'py-2.5 px-3.5' }"
           />
         </div>
 
-        <div>
-          <label>
-            Caută produs
-            <span v-if="isSearching" class="text-xs text-gray-400"> (Se caută...)</span>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-gray-600 tracking-wide uppercase flex items-center justify-between">
+            Caută aliment în baza de date
+            <span v-if="isSearching" class="text-[10px] text-emerald-600 font-medium lowercase animate-pulse">Căutare activă...</span>
           </label>
-          <input
-              type="text"
-              v-model="form.name"
-              @blur="fetchSearch"
-              placeholder="Ex: Lapte, Mar..."
-              class="w-full border rounded px-3 py-2"
-          />
+          <div class="relative">
+            <input
+                type="text"
+                v-model="form.name"
+                @blur="fetchSearch"
+                placeholder="Ex: Lapte Pilos, Banane..."
+                class="w-full bg-gray-50 border border-gray-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 transition-all rounded-xl px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none"
+            />
+          </div>
 
           <div
               v-if="productsFound.length > 0"
-              class="mt-2 p-2 border bg-gray-50 max-h-60 overflow-y-auto"
+              class="mt-1 border border-gray-100 bg-white rounded-xl max-h-56 overflow-y-auto shadow-xl z-50 divide-y divide-gray-50"
           >
-            <p class="font-semibold text-xs text-gray-500 mb-1">Alege varianta exactă din listă:</p>
+            <div class="p-2 bg-gray-50/50 text-[10px] font-bold text-gray-400 uppercase tracking-wider sticky top-0 backdrop-blur-xs">Rezultate găsite:</div>
             <div
                 v-for="p in productsFound"
                 :key="p.code"
                 @mousedown="selectProduct(p)"
-                class="text-sm p-1 hover:bg-green-500 hover:text-white cursor-pointer rounded transition-colors"
+                class="text-xs p-3 hover:bg-emerald-50 text-gray-700 hover:text-emerald-900 cursor-pointer transition-colors flex flex-col gap-0.5"
             >
-              {{ p.product_name_ro || p.product_name || 'Produs fără nume' }} - {{ p.brands || 'Brand necunoscut' }}
+              <span class="font-medium">{{ p.product_name_ro || p.product_name || 'Produs fără nume' }}</span>
+              <span class="text-[10px] text-gray-400">{{ p.brands || 'Brand nesunoscut' }}</span>
             </div>
           </div>
         </div>
 
-        <div v-if="selectedProduct" class="p-2 bg-green-50 border border-green-200 rounded text-sm text-green-800">
-          Produs selectat: <strong>{{ selectedProduct.name }}</strong>
+        <div v-if="selectedProduct && selectedProduct.name" class="p-3.5 bg-emerald-50/60 border border-emerald-100 rounded-xl text-xs text-emerald-800 flex flex-col gap-1 shadow-2xs">
+          <div class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>Aliment selectat: <strong class="font-semibold text-emerald-900">{{ selectedProduct.name }}</strong></span>
+          </div>
+          <div class="text-[10px] text-emerald-600/90 pl-3">
+            Valori nutriționale estimate la 100g extrapolate în formular.
+          </div>
         </div>
 
-        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">
-          Adaugă
+        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.99] text-white font-medium text-sm px-4 py-3 rounded-xl shadow-sm shadow-emerald-100 transition-all mt-2">
+          Adaugă în jurnalul de astăzi
         </button>
       </form>
-      <div v-else-if="props.type === 'AI'" class="flex flex-col w-full bg-white h-[600px]">
-        <h2 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2">
-          Asistentul tău Personal
+
+      <div v-else-if="props.type === 'AI'" class="flex flex-col w-full bg-white h-[600px] p-1">
+        <h2 class="font-bold text-base text-gray-800 border-b border-gray-100 pb-3 mb-4 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+          Asistentul tău Personal WellSync
         </h2>
 
-        <div class="flex-1 bg-gray-50 rounded-lg overflow-hidden relative">
+        <div class="flex-1 bg-gray-50 rounded-xl overflow-hidden relative border border-gray-100">
           <Chatbot />
         </div>
       </div>

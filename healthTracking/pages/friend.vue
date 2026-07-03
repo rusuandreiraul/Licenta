@@ -231,22 +231,55 @@ onMounted(() => {
           <div class="absolute top-2 right-0">
             <UModal>
               <UButton
-                label="Adauga Postare"
-                color="green"
-                variant="subtle"
-                icon="i-lucide-plus"
+                  label="Adaugă Postare"
+                  color="green"
+                  variant="subtle"
+                  icon="i-lucide-plus"
+                  class="font-semibold transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm"
               />
+
               <template #content>
-                <div class="p-4">
-                  <h3 class="mb-4 font-bold">Creează o postare nouă</h3>
-                  <UTextarea
-                    v-model="postContent"
-                    placeholder="Ce ai reușit astăzi?"
-                  />
-                  <!--share obiectiv etc-->
-                  <UButton class="mt-4 w-full" @click="sendPost"
-                    >Postează</UButton
+                <div class="p-6 bg-white dark:bg-gray-900 rounded-xl max-w-md w-full mx-auto">
+
+                  <div class="flex items-center gap-2 mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
+                    <div>
+                      <h3 class="text-lg font-bold text-gray-900 dark:text-white leading-none">
+                        Creează o postare nouă
+                      </h3>
+                      <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        Împărtășește progresul tău cu comunitatea
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="space-y-4">
+                    <UTextarea
+                        v-model="postContent"
+                        placeholder="Ce ai reușit astăzi? Împărtășește o realizare, un obicei sau un nou record..."
+                        :rows="4"
+                        resize="none"
+                        autofocus
+                        class="w-full text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                        :ui="{
+            color: { white: 'focus:ring-2 focus:ring-green-500 dark:focus:ring-green-500' },
+            rounded: 'rounded-xl'
+          }"
+                    />
+
+                    <div class="border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl p-3 flex items-center justify-center gap-2 text-xs text-gray-400">
+                      <UIcon name="i-lucide-sparkles" class="w-4 h-4 text-gray-300" />
+                      <span>Spațiu rezervat pentru atașare activități...</span>
+                    </div>
+                  </div>
+
+                  <UButton
+                      class="mt-5 w-full justify-center py-2.5 font-semibold text-sm transition-all shadow-md hover:shadow-green-500/20 active:translate-y-px rounded-xl"
+                      color="green"
+                      icon="i-lucide-send"
+                      @click="sendPost"
                   >
+                    Postează
+                  </UButton>
                 </div>
               </template>
             </UModal>

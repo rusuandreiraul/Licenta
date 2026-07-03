@@ -218,6 +218,11 @@ async function handleDelete() {
   await fetchActivitySeries();
 }
 
+async function fetchNewActivity() {
+  await fetchActivitiesByDate();
+  await fetchActivitySeries();
+}
+
 onMounted(async () => {
   await getGoals();
   goals.value=dataGoals.value;
@@ -259,7 +264,7 @@ onMounted(async () => {
             <p class="text-sm font-semibold text-gray-700 hidden sm:block">
               Înregistrează o activitate:
             </p>
-            <AddModal type="Adăugare activitate" :date="modelValueDate" />
+            <AddModal type="Adăugare activitate" :date="modelValueDate" @success="fetchNewActivity" />
           </div>
         </div>
         <div class="grid grid-cols-2 justify-center items-center bg-white rounded-xl shadow-sm border border-gray-100 items-start"">

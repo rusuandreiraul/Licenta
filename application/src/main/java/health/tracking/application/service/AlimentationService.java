@@ -44,10 +44,6 @@ public class AlimentationService {
             List<AlimentationDTO> dtos = alimentation.stream()
                     .map(alimentationMapper::toDto)
                     .toList();
-
-            // LOG 2: Verifică DTO-ul după mapare
-            dtos.forEach(dt -> System.out.println("DTO Name: " + dt.getNameProduct()));
-
             return dtos;
 
         }

@@ -230,6 +230,11 @@ watch(modelValueDate, (newDate) => {
   fetchSleepByDate();
 });
 
+async function fetchAllSleep(){
+  await fetchSleepByDateRange();
+  await fetchSleepByDateRange();
+}
+
 onMounted(() => {
   fetchSleepByDateRange();
   fetchSleepByDate();
@@ -260,22 +265,19 @@ onMounted(() => {
             </UPopover>
            <div v-if="sleepDataByDate">
              <UModal
-                 title="Confirmă stergerea"
+                 title="Confirmă ștergerea"
                  :close="{
                             color: 'primary',
                             variant: 'outline',
                             class: 'rounded-full'
                               }">
                <UButton label="Sterge" color="error" @click="openModal(sleepDataByDate.id)"/>
-               <template #content>
+               <template #body>
                  <div class="p-4">
-                   <p>Sigur vrei să ștergi această activitate?</p>
+                   <p>Sigur vrei să ștergi această sesiune de somn?</p>
                    <div class="flex gap-3 justify-end mt-4">
-                     <button @click="showModal = false" class="px-4 py-2 bg-gray-300 rounded">
-                       Anulează
-                     </button>
 
-                     <button @click="deleteSleep" class="px-4 py-2 bg-red-500 hover: translate-1 text-white rounded">
+                     <button @click="deleteSleep" class="px-4 py-2 bg-red-500 hover:translate-1 text-white rounded">
                        Șterge
                      </button>
                    </div>
@@ -292,7 +294,7 @@ onMounted(() => {
             <p class="text-sm font-semibold text-gray-700 hidden sm:block">
               Înregistrează sesiunea de somn:
             </p>
-            <AddModal type="sleep" :user="user" :date="modelValueDate" />
+            <AddModal type="Adăugare sesiune de somn" :user="user" :date="modelValueDate" @success="fetchAllSleep" />
           </div>
         </div>
         <div class="grid grid-cols-2 gap-4 items-stretch">

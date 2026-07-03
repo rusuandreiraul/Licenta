@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import Sidebar from "~/components/Sidebar.vue";
 import { useAuth } from "~/composable/useAuth";
 import { today, getLocalTimeZone } from "@internationalized/date";
@@ -97,7 +97,6 @@ const chartOptionsBar = ref({
       labels: { style: { colors: "#8b5cf6" } }
     },
     {
-      // CORECTURĂ: Mapare exactă pe seria[2] -> "Calorii consumate" (forțată pe aceeași scară cu axa stângă)
       seriesName: "Calorii arse",
       show: false
     }
@@ -126,10 +125,9 @@ const chartOptionsRadial = ref({
       },
     },
   },
-  labels: ["Exercise", "Sleep", "Food"],
+  labels: ["Activitate", "Somn", "Nutriție"],
 });
 
-// Dashboard icons
 const icons = {
   activity: `<svg class="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4.5V19a1 1 0 0 0 1 1h15M7 14l4-4 4 4 5-5m0 0h-3.207M20 9v3.207"/></svg>`,
   sleep: `<svg class="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 17v2M12 5.5V10m-6 7v2m15-2v-4c0-1.6569-1.3431-3-3-3H6c-1.65685 0-3 1.3431-3 3v4h18Zm-2-7V8c0-1.65685-1.3431-3-3-3H8C6.34315 5 5 6.34315 5 8v2h14Z"/></svg>`,
@@ -284,7 +282,6 @@ async function refreshFetch() {
 
 watch(date, (newDate) => {
   week.value = getLastWeekDates(newDate);
-  // CORECTURĂ: Folosim clonarea cu operatorul spread ca să nu modificăm direct variabila reactivă week
   chartOptionsBar.value.xaxis.categories = [...week.value]
   fetchDailyData();
   fetchWeekData();
@@ -295,201 +292,198 @@ onMounted(async () => {
   refreshFetch();
 });
 </script>
+
 <template>
   <div
-    class="min-h-screen w-full flex bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 relative"
+      class="min-h-screen w-full flex bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 relative"
   >
     <Sidebar />
-<client-only>
-    <main  v-if="user" class="flex-1 p-6 sm:pl-72 pt-5">
-      <div  class="flex flex-col md:flex-row gap-6 min-h-screen items-start">
-        <div class="flex-1 bg-gray-100 h-full rounded-lg p-4">
-          <div>
-            <h1 class="text-bold text-2xl">Salut, {{ username }} 👋</h1>
-          </div>
-          <div class="grid grid-cols-2 p-6 gap-2">
-            <div class="bg-white rounded-2xl text-center transition-all hover:-translate-y-2 hover:shadow-xl">
-              <client-only>
-                <apexchart
-                  type="radialBar"
-                  :height="300"
-                  :options="chartOptionsRadial"
-                  :series="seriesRadial"
-                />
-              </client-only>
-              Tot progresul într-un singur grafic
+    <client-only>
+      <main v-if="user" class="flex-1 p-6 sm:pl-72 pt-5">
+        <div class="flex flex-col md:flex-row gap-6 min-h-screen items-start">
+          <div class="flex-1 bg-gray-100 h-full rounded-lg p-4">
+            <div>
+              <h1 class="text-bold text-2xl">Salut, {{ username }} 👋</h1>
             </div>
-            <div class="bg-white rounded-2xl transition-all hover:-translate-y-2 hover:shadow-xl">
-              <client-only>
-                <apexchart
-                  type="bar"
-                  :key="date"
-                  :height="320"
-                  :options="chartOptionsBar"
-                  :series="seriesBar"
-                />
-              </client-only>
+            <div class="grid grid-cols-2 p-6 gap-2">
+              <div class="bg-white rounded-2xl text-center transition-all hover:-translate-y-2 hover:shadow-xl">
+                <client-only>
+                  <apexchart
+                      type="radialBar"
+                      :height="300"
+                      :options="chartOptionsRadial"
+                      :series="seriesRadial"
+                  />
+                </client-only>
+                Tot progresul într-un singur grafic
+              </div>
+              <div class="bg-white rounded-2xl transition-all hover:-translate-y-2 hover:shadow-xl">
+                <client-only>
+                  <apexchart
+                      type="bar"
+                      :key="date"
+                      :height="320"
+                      :options="chartOptionsBar"
+                      :series="seriesBar"
+                  />
+                </client-only>
+              </div>
             </div>
-          </div>
 
-          <div class="grid grid-cols-3 p-2 gap-2 ">
-            <DashboardCard
-              title="Activitate fizică"
-              :icon="icons.activity"
-              :content="activityData"
-            />
-            <DashboardCard
-              title="Somn"
-              :icon="icons.sleep"
-              :content="sleepData"
-            />
-            <DashboardCard
-              title="Nutriție"
-              :icon="icons.alimentation"
-              :content="alimentationData"
-            />
-          </div>
-        </div>
-        <div class="w-full md:w-[300px] h-full flex flex-col gap-4">
-          <!-- Card user info -->
-          <div
-            class="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center space-y-4"
-          >
-            <!-- Avatar și nume -->
-            <div class="flex flex-col items-center space-y-2">
-              <NuxtImg
-                class="w-20 h-20 rounded-full border-2 border-green-500 object-cover"
-                :src="userValue.urlProfileImage"
-                alt="Avatar user"
-                width="80"
-                height="80"
-                loading="lazy"
+            <div class="grid grid-cols-3 p-2 gap-2 ">
+              <DashboardCard
+                  title="Activitate fizică"
+                  :icon="icons.activity"
+                  :content="activityData"
               />
-              <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
-                {{ username }}
-              </h2>
+              <DashboardCard
+                  title="Somn"
+                  :icon="icons.sleep"
+                  :content="sleepData"
+              />
+              <DashboardCard
+                  title="Nutriție"
+                  :icon="icons.alimentation"
+                  :content="alimentationData"
+              />
             </div>
+          </div>
+          <div class="w-full md:w-[300px] h-full flex flex-col gap-4">
+            <!-- Card user info -->
+            <div
+                class="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center space-y-4"
+            >
+              <!-- Avatar și nume -->
+              <div class="flex flex-col items-center space-y-2">
+                <NuxtImg
+                    class="w-20 h-20 rounded-full border-2 border-green-500 object-cover"
+                    :src="userValue.urlProfileImage"
+                    alt="Avatar user"
+                    width="80"
+                    height="80"
+                    loading="lazy"
+                />
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
+                  {{ username }}
+                </h2>
+              </div>
 
-            <div class="grid grid-cols-3 gap-2 text-center w-full">
-              <div class="flex flex-col items-center">
-                <span class="text-gray-700 text-sm">Greutate</span>
-                <span class="text-lg font-medium text-gray-800 dark:text-white">
+              <div class="grid grid-cols-3 gap-2 text-center w-full">
+                <div class="flex flex-col items-center">
+                  <span class="text-gray-700 text-sm">Greutate</span>
+                  <span class="text-lg font-medium text-gray-800 dark:text-white">
                   {{ userValue.weight || "-" }} kg
                 </span>
-              </div>
-              <div class="flex flex-col items-center">
-                <span class="text-gray-700 text-sm">Înalțime</span>
-                <span class="text-lg font-medium text-gray-800 dark:text-white">
+                </div>
+                <div class="flex flex-col items-center">
+                  <span class="text-gray-700 text-sm">Înalțime</span>
+                  <span class="text-lg font-medium text-gray-800 dark:text-white">
                   {{ userValue.height || "-" }} cm
                 </span>
-              </div>
-              <div class="flex flex-col items-center">
-                <span class="text-gray-700 text-sm">Data de naștere</span>
-                <span class="text-lg font-medium text-gray-800 dark:text-white">
+                </div>
+                <div class="flex flex-col items-center">
+                  <span class="text-gray-700 text-sm">Data de naștere</span>
+                  <span class="text-lg font-medium text-gray-800 dark:text-white">
                   {{ userValue.birthDate || "-" }}
                 </span>
+                </div>
               </div>
+
+              <UModal title="Modificare profil">
+                <UButton
+                    class="mt-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-black rounded-full text-sm font-medium transition-colors"
+                >
+                  Modificare profil
+                  <svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                  </svg>
+                </UButton>
+
+                <template #body>
+                  <div class="p-5">
+                    <form @submit.prevent="fetchChanges" class="space-y-5">
+
+
+                      <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-1.5">
+                          <label for="height" class="text-xs font-semibold text-gray-500 tracking-wide uppercase">
+                            Înălțime (cm)
+                          </label>
+                          <UInput
+                              id="height"
+                              type="number"
+                              v-model="userValue.height"
+                              placeholder="Ex: 180"
+                              class="shadow-2xs"
+                              ui="{ rounded: 'rounded-xl', padding: 'py-2.5 px-3.5' }"
+                          />
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                          <label for="weight" class="text-xs font-semibold text-gray-500 tracking-wide uppercase">
+                            Greutate (kg)
+                          </label>
+                          <UInput
+                              id="weight"
+                              type="number"
+                              v-model="userValue.weight"
+                              placeholder="Ex: 75"
+                              class="shadow-2xs"
+                              ui="{ rounded: 'rounded-xl', padding: 'py-2.5 px-3.5' }"
+                          />
+                        </div>
+                      </div>
+
+                      <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-semibold text-gray-500 tracking-wide uppercase">
+                          Noua Imagine de profil
+                        </label>
+                        <UInput
+                            type="file"
+                            @change="handleFileChange"
+                            class="shadow-2xs cursor-pointer"
+                            ui="{
+                            rounded: 'rounded-xl',
+                            file: {
+                              base: 'file:bg-gray-100 file:text-gray-700 file:border-0 file:rounded-lg file:hover:bg-gray-200 file:cursor-pointer file:font-medium file:text-xs file:py-1 file:px-2 file:mr-2'
+                            }
+                          }"
+                        />
+                      </div>
+
+                      <UButton
+                          type="submit"
+                          label="Salvează modificările profilului"
+                          block
+                          size="lg"
+                          class="mt-4 font-semibold shadow-sm transition-all active:scale-[0.99]"
+                          color="indigo"
+                          ui="{ rounded: 'rounded-xl', padding: 'py-3' }"
+                      />
+                    </form>
+                  </div>
+                </template>
+              </UModal>
             </div>
 
-            <UModal title="Modificare profil">
-              <UButton
+            <div>
+              <GoalsCard
+                  :targetUsername="username"
+                  @goalsUpdated="refreshFetch"
+              />
+            </div>
 
-                class="mt-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-black rounded-full text-sm font-medium transition-colors"
-              >
-                Modificare profil
-                <svg class="w-6 h-6 text-white-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="square" stroke-linejoin="round" stroke-width="2" d="M10 19H5a1 1 0 0 1-1-1v-1a3 3 0 0 1 3-3h2m10 1a3 3 0 0 1-3 3m3-3a3 3 0 0 0-3-3m3 3h1m-4 3a3 3 0 0 1-3-3m3 3v1m-3-4a3 3 0 0 1 3-3m-3 3h-1m4-3v-1m-2.121 1.879-.707-.707m5.656 5.656-.707-.707m-4.242 0-.707.707m5.656-5.656-.707.707M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                </svg>
-              </UButton>
-              <template #body>
-                <div class="p-4">
-                  <form @submit.prevent="fetchChanges" class="flex flex-col gap-4">
-                    <div class="flex flex-col gap-1.5">
-                      <label for="password" class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Parolă
-                      </label>
-                      <UInput
-                          id="password"
-                          type="password"
-                          placeholder="*******"
-                          icon="i-heroicons-lock-closed"
-                      />
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                      <div class="flex flex-col gap-1.5">
-                        <label for="height" class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Înălțime (cm)
-                        </label>
-                        <UInput
-                            id="height"
-                            type="number"
-                            v-model="userValue.height"
-                            placeholder="180"
-                        />
-                      </div>
-                      <div class="flex flex-col gap-1.5">
-                        <label for="weight" class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Greutate (kg)
-                        </label>
-                        <UInput
-                            id="weight"
-                            type="number"
-                            v-model="userValue.weight"
-                            placeholder="75"
-                        />
-                      </div>
-                    </div>
-                    <div class="flex flex-col gap-1.5">
-                      <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Imagine profil
-                      </label>
-                      <UInput
-                          type="file"
-                          @change="handleFileChange"
-                          :ui="{
-    file: {
-      base: 'file:bg-white file:text-gray-700 file:border file:border-gray-300 file:rounded-md file:hover:bg-gray-50 file:cursor-pointer'
-    }
-  }"
-                      />
-                    </div>
-                    <UButton
-                        type="submit"
-                        label="Confirmă modificările"
-                        block
-                        size="md"
-                        class="mt-2 font-semibold"
-                        color="indigo"
-                    />
-                  </form>
-                </div>
-              </template>
-            </UModal>
+            <!-- Calendar separat jos -->
+            <client-only>
+              <div class="bg-gray-100 rounded-2xl p-4 flex-1">
+                <UCalendar v-model="date" />
+              </div>
+            </client-only>
           </div>
-
-          <div>
-            <GoalsCard
-              :targetUsername="username"
-              @goalsUpdated="refreshFetch"
-            />
-          </div>
-
-          <!-- Calendar separat jos -->
-          <client-only>
-          <div class="bg-gray-100 rounded-2xl p-4 flex-1">
-            <UCalendar v-model="date" />
-          </div>
-          </client-only>
         </div>
-      </div>
-    </main>
-    <template #fallback>
-      <!-- Ce vede utilizatorul o fracțiune de secundă până la hidratare -->
-      <div class="flex-1 p-6 sm:ml-64 pt-5 text-gray-500">Se încarcă datele...</div>
-    </template>
+      </main>
+      <template #fallback>
+        <div class="flex-1 p-6 sm:ml-64 pt-5 text-gray-500">Se încarcă datele...</div>
+      </template>
     </client-only>
-
-
   </div>
 </template>
