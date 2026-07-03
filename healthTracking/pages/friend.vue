@@ -19,6 +19,73 @@ const leaderboard=ref({})
 const usernameBestStreak=ref("");
 
 
+const selectedAttachment = ref(null);
+
+const groupedOptions = ref([]);
+
+async function fetchTodayActivities() {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+
+    const response = await fetch(`http://localhost:8080/dashboard-daily/${today}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.value}`,
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const options = [];
+
+      if (data.activityDetails && data.activityDetails.length > 0) {
+        options.push({
+          groupLabel: '🏋️‍♂️ Activități Fizice',
+          items: data.activityDetails.map(act => ({
+            label: `${act.activityType} (${act.duration} min)`,
+            type: 'ACTIVITY',
+            id: act.id,
+            text: `${act.activityType} - ${act.duration} min`
+          }))
+        });
+      }
+
+
+      if (data.sleepDetails && data.totalHoursSleep > 0) {
+        options.push({
+          groupLabel: '🌙 Somn',
+          items: [{
+            label: `Somn: ${data.totalHoursSleep} ore`,
+            type: 'SLEEP',
+            id: data.sleepDetails.id,
+            text: `Somn: ${data.totalHoursSleep} ore`
+          }]
+        });
+      }
+
+
+      if (data.alimentationName && data.alimentationName.length > 0) {
+        options.push({
+          groupLabel: '🍏 Alimentație',
+          items: data.alimentationName.map((foodName, index) => ({
+            label: foodName,
+            type: 'ALIMENTATION',
+            id: index,
+            text: `Consumat: ${foodName}`
+          }))
+        });
+      }
+
+      groupedOptions.value = options;
+    }
+  } catch (e) {
+    console.error("Eroare la preluarea datelor din dashboard:", e);
+  }
+}
+
+
+
 async function getBestStreak(){
   try{
     const response=await fetch(`http://localhost:8080/best-streak`,{
@@ -75,39 +142,12 @@ async function getUsers() {
     );
     if (response.ok) {
       const data = await response.json();
-      friendList.value = [data]; //aici va trebuie sa vad cum sa fac sa returnez daca caut pop sa returneze tot cei care incep cu pop
+      friendList.value = [data];
     }
   } catch (e) {
     console.error(e);
   }
 }
-
-async function sendPost() {
-  try {
-    const postPayload = {
-      username: user.value,
-      content: postContent.value,
-    };
-
-    const response = await fetch(`http://localhost:8080/add-post`, {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token.value}`
-        },
-
-      body: JSON.stringify(postPayload),
-    });
-
-    if (response.ok) {
-      postContent.value = "";
-      await getPosts();
-    }
-  } catch (e) {
-    console.error(e);
-  }
-}
-
 async function getPosts() {
   try {
     const response = await fetch(
@@ -128,10 +168,51 @@ async function getPosts() {
   }
 }
 
+async function sendPost() {
+
+  if (!postContent.value.trim() && !selectedAttachment.value) return;
+
+  try {
+    let finalContent = postContent.value;
+
+
+    if (selectedAttachment.value) {
+      // \n\n adaugă spațiu între mesajul utilizatorului și activitate
+      finalContent += `\n\n${selectedAttachment.value.text}`;
+    }
+
+
+    const postPayload = {
+      username: user.value,
+      content: finalContent // Trimitem textul gata combinat
+    };
+
+    console.log("Se trimite payload-ul combinat:", postPayload);
+
+    const response = await fetch(`http://localhost:8080/add-post`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token.value}`
+      },
+      body: JSON.stringify(postPayload),
+    });
+
+    if (response.ok) {
+      alert("Postarea a fost făcută cu succes");
+      postContent.value = "";
+      selectedAttachment.value = null;
+      await getPosts();
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
 onMounted(() => {
   getPosts();
   getLeaderboard();
   getBestStreak();
+  fetchTodayActivities();
 });
 </script>
 
@@ -202,7 +283,7 @@ onMounted(() => {
           </div>
         </div>
         <div class="flex flex-col gap-2 w-full lg:w-64 lg:order-3">
-          <i>Cauta prieteni</i>
+          <i>Caută prieteni</i>
           <UInput
             icon="i-lucide-search"
             size="md"
@@ -266,9 +347,34 @@ onMounted(() => {
           }"
                     />
 
-                    <div class="border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl p-3 flex items-center justify-center gap-2 text-xs text-gray-400">
-                      <UIcon name="i-lucide-sparkles" class="w-4 h-4 text-gray-300" />
-                      <span>Spațiu rezervat pentru atașare activități...</span>
+                    <div class="space-y-1.5 text-left w-full">
+                      <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                        <UIcon name="i-lucide-paperclip" class="w-3.5 h-3.5 text-green-500" />
+                        Atașează un progres de astăzi (Opțional)
+                      </label>
+
+                      <select
+                          v-model="selectedAttachment"
+                          class="w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                      >
+                        <option :value="null">Alege o activitate, somn sau aliment...</option>
+
+                        <optgroup
+                            v-for="group in groupedOptions"
+                            :key="group.groupLabel"
+                            :label="group.groupLabel"
+                            class="font-semibold text-gray-500"
+                        >
+                          <option
+                              v-for="item in group.items"
+                              :key="item.label"
+                              :value="item"
+                              class="text-gray-900 dark:text-white font-normal"
+                          >
+                            {{ item.label }}
+                          </option>
+                        </optgroup>
+                      </select>
                     </div>
                   </div>
 
@@ -295,6 +401,7 @@ onMounted(() => {
             :content="p.content"
             :urlImage="p.urlImage"
             :createDate="p.publishDate"
+
           />
           <div
             v-if="posts.length === 0"
